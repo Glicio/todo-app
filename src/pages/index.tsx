@@ -1,5 +1,6 @@
 import { type NextPage } from "next";
 import Head from "next/head";
+import Todos from "~/components/content/todos";
 
 import NavBar from "~/components/navigation/nav_bar";
 
@@ -14,6 +15,7 @@ const Home: NextPage = () => {
       </Head>
       <main className="flex min-h-screen flex-col bg-gray-950 text-white">
         <NavBar />
+        <Todos /> 
       </main>
     </>
   );
