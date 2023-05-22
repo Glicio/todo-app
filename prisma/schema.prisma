@@ -32,6 +32,30 @@ model Account {
     @@unique([provider, providerAccountId])
 }
 
+model Todo {
+    id          String   @id @default(cuid())
+    title       String
+    description String?
+    user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId      String
+    categoryId  String?
+    category    Category? @relation(fields: [categoryId], references: [id])
+    
+    @@index([userId])
+    @@index([categoryId])
+}
+
+model Category {
+    id          String   @id @default(cuid())
+    name        String
+    description String?
+    user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId      String
+    todos       Todo[]
+
+    @@index([userId])
+}
+
 model Session {
     id           String   @id @default(cuid())
     sessionToken String   @unique
@@ -50,6 +74,8 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+    todos         Todo[]
+    categories    Category[]
 }
 
 model VerificationToken {
