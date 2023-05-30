@@ -25,9 +25,14 @@ interface CategoryResponse {
     name: string;
     description: string;
     userId: string;
+    color: string;
 }
 
 export const todos = createTRPCRouter({
+    /**
+    * return a list of users todos containing the category name and id and a list of categories
+    * @param input.excludeDone - if true, only return todos that are not done
+    **/ 
     getUserTodos: protectedProcedure
         .input(
             z.object({
@@ -59,7 +64,7 @@ export const todos = createTRPCRouter({
                     return {
                         ...todo,
                         category: category
-                            ? { name: category.name, id: category.id }
+                            ? { name: category.name, id: category.id, color: category.color }
                             : { name: undefined, id: undefined },
                     };
                 });
@@ -67,7 +72,7 @@ export const todos = createTRPCRouter({
                 return {
                     todos: todosWithCategory,
                     categories: categories.map((category) => {
-                        return { name: category.name, id: category.id };
+                        return { name: category.name, id: category.id, color: category.color };
                     }),
                 };
             } catch (e) {
