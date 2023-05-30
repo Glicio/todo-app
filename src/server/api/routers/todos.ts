@@ -7,29 +7,34 @@ import {
     protectedProcedure,
 } from "~/server/api/trpc";
 import { db } from "~/server/db";
+import { CategoryResponse, TodoResponse } from "~/utils/db_responses";
 
-interface TodoResponse {
-    id: string;
-    title: string;
-    description: string;
-    userId: string;
-    categoryId: string;
-    createdAt: string;
-    done: string;
-    dueDate: string;
-    updatedAt: string;
-}
 
-interface CategoryResponse {
-    id: string;
-    name: string;
-    description: string;
-    userId: string;
-    color: string;
-}
 
 export const todos = createTRPCRouter({
     /**
+    * returns the count of todos for the current user
+    * */
+    getTodoCount: protectedProcedure.query(async ({ ctx }) => {
+        if (!ctx.session.user) throw new TRPCError({ code: "UNAUTHORIZED" });
+        const smt = `SELECT COUNT(*) FROM Todo WHERE userId = ?;`;
+        type count = { "count(*)": number };
+        try {
+            const query = await db.execute(smt, [ctx.session.user.id]);
+            const rows = query.rows as count[];
+            if(!query || !rows[0]) throw new TRPCError({ code: "NOT_FOUND", message: "Todos not found" })
+            const count = rows[0]["count(*)"] ? rows[0]["count(*)"] : 0
+            return count
+        } catch (e) {
+            console.log(e);
+            throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Error while fetching todos",
+            });
+        }
+    }),
+    /**
+        * 
     * return a list of users todos containing the category name and id and a list of categories
     * @param input.excludeDone - if true, only return todos that are not done
     **/ 
