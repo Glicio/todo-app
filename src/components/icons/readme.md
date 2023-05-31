@@ -1,3 +1,3 @@
 # SVG Icons
 
-Icons from (https://heroicons.com/)[heroicons]
+Icons from [heroicons](https://heroicons.com/)
