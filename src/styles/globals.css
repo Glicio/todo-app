@@ -3,15 +3,27 @@
 @tailwind utilities;
 
 
+/*variables*/
+* {
+    --primary-color: #000;
+    --secondary-color: #150050;
+    --tertiary-color: #4a5568;
+}
 
 .primary-text-input{
-    @apply border-b border-black bg-none outline-none;
+    @apply border rounded-md bg-white text-black p-2;
+}
+.primary-text-area{
+    @apply border rounded-md bg-white text-black p-2;
+}
+.primary-select{
+    @apply rounded-md border border-gray-300 p-2 text-black;
 }
 
 .primary-button{
-    @apply bg-blue-500 text-white px-4 py-2 rounded-md;
+    @apply bg-[var(--secondary-color)] px-4 py-2 rounded-md text-white w-[8rem];
 }
 .secondary-button{
-    @apply px-4 py-2 rounded-md text-red-500;
+    @apply px-4 py-2 border border-white rounded-md text-white w-[8rem];
 }
 
