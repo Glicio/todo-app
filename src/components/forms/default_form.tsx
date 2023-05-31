@@ -14,11 +14,15 @@ export default function DefaultForm({
         <form
             action=""
             className={`
-            flex flex-col w-screen h-screen 
+            flex flex-col w-screen h-screen min-w-screen min-h-screen 
             items-center justify-center bg-[var(--primary-color)] 
             md:rounded-md 
             md:p-4 
-            md:shadow-md md:w-fit md:h-fit`}
+            md:shadow-md md:w-fit md:h-fit
+            md:min-w-fit md:min-h-fit
+            md:border
+            md:border-[var(--secondary-color)]
+            `}
             onSubmit={(e) => {
                 e.preventDefault();
                 onSubmit();

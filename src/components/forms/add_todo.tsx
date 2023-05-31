@@ -37,7 +37,12 @@ export default function AddTodo({ close }: { close: () => void }) {
         console.log(todo);
     }, [todo]);
     return (
-        <div className="absolute left-0 top-0 flex h-screen w-screen items-center justify-center backdrop-blur">
+        <div className="modal absolute left-0 top-0 flex min-h-screen min-w-screen w-screen h-screen items-center justify-center backdrop-blur" onClick={(e) => {
+            const target = e.target as HTMLElement;
+            if (target.classList.contains("modal")) {
+                close();
+            }
+        }}>
             <DefaultForm
                 title="Add new Todo"
                 onSubmit={() => {
