@@ -66,8 +66,8 @@ export default function NavBar() {
 
 
     return (
-        <div className="flex w-full h-12 bg-primary items-center p-4 bg-[var(--secondary-color)]">
-            <span className="font-bold">TO-DO</span>
+        <div className="flex w-full h-12 bg-primary items-center p-4 border-b border-[var(--tertiary-color)]">
+            <span className="font-bold text-[var(--secondary-color)]">TO-DO</span>
             <div className="ml-auto">
                 <UserButton />
             </div>
