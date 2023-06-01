@@ -3,6 +3,7 @@ import Head from "next/head";
 import Todos from "~/components/content/todos";
 
 import NavBar from "~/components/navigation/nav_bar";
+import Navigation from "~/components/navigation/navigation";
 
 const Home: NextPage = () => {
 
@@ -16,6 +17,7 @@ const Home: NextPage = () => {
       <main className="flex min-h-screen flex-col bg-[var(--primary-color)] text-white">
         <NavBar />
         <Todos /> 
+        <Navigation />
       </main>
     </>
   );
