@@ -34,7 +34,7 @@ export default function Todos() {
             {!showAddTodo && (
                 <button
                     onClick={() => setShowAddTodo(true)}
-                    className="fixed bottom-20 right-4 z-10 rounded-full bg-[var(--secondary-color)] text-gray-300"
+                    className="fixed bottom-20 w-12 h-12 right-4 z-10 rounded-full bg-[var(--secondary-color)] text-gray-300"
                 >
                     <AddIcon />
                 </button>
