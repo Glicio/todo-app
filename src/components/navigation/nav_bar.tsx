@@ -67,7 +67,7 @@ export default function NavBar() {
 
     return (
         <div className="flex w-full h-12 bg-primary items-center p-4 border-b border-[var(--tertiary-color)]">
-            <span className="font-bold text-[var(--secondary-color)]">TO-DO</span>
+            <span className="font-bold text-[var(--secondary-color)]">JET</span>
             <div className="ml-auto">
                 <UserButton />
             </div>
