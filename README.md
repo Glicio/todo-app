@@ -1,4 +1,5 @@
-# TO-DO APP
+# JET
+(just enough todos)
 ## A simple to-do app
 
 just a simple to-do application for my portfolio.
