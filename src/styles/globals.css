@@ -27,3 +27,14 @@
     @apply px-4 py-2 border border-white rounded-md text-white w-[8rem];
 }
 
+.thin-scroll::-webkit-scrollbar {
+    width: 2px;
+    height: 2px;
+}
+.thin-scroll::-webkit-scrollbar-track {
+    background: var(--tertiary-color);
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+    background: var(--secondary-color);
+}
+
