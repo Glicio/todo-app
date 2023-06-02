@@ -3,6 +3,7 @@ import Image from "next/image";
 import React from "react";
 import TeamSelect from "../input/team_select";
 import UserIcon from "../icons/user_icon";
+import UserProfilePic from "../user/UserProfilePic";
 
 const UserMenu = () => {
     const { data: session } = useSession();
@@ -52,17 +53,7 @@ const UserButton = () => {
                     setShowMenu(!showMenu);
                 }}
             >
-                {session?.user?.image ? (
-                    <Image
-                        alt="user profile pick"
-                        width="200"
-                        height="200"
-                        src={session?.user?.image}
-                        className="h-6 w-6 rounded-full"
-                    />
-                ) : (
-                    <UserIcon />
-                )}
+            <UserProfilePic image={session?.user.image || undefined} />
             </button>
         </div>
     );
