@@ -2,6 +2,7 @@ import React from "react";
 import { api } from "~/utils/api";
 import DefaultForm from "./default_form";
 import { DateTimePicker } from "@mantine/dates";
+import ModalContainer from "../containers/modal_container";
 
 interface TodoState {
     title: string;
@@ -29,7 +30,7 @@ const todoInitialState: TodoState = {
 /**
  * the form to add a new todo.
  * */
-export default function AddTodo({ close }: { close: () => void }) {
+export default function AddTodo({ opened, close }: {opened: boolean, close: () => void }) {
     const categoriesQuery = api.category.getUserCategories.useQuery();
     const [selectedCategory, setSelectedCategory] = React.useState<string>("");
     const [todo, dispatch] = React.useReducer(todoReducer, todoInitialState);
@@ -38,12 +39,7 @@ export default function AddTodo({ close }: { close: () => void }) {
         console.log(todo);
     }, [todo]);
     return (
-        <div className="modal z-10 absolute left-0 top-0 flex w-screen min-h-screen backdrop-blur" onClick={(e) => {
-            const target = e.target as HTMLElement;
-            if (target.classList.contains("modal")) {
-                close();
-            }
-        }}>
+            <ModalContainer opened={opened} onClose={close}>
             <DefaultForm
                 title="Add new Todo"
                 onSubmit={() => {
@@ -119,6 +115,6 @@ export default function AddTodo({ close }: { close: () => void }) {
                     </div>
                 </div>
             </DefaultForm>
-        </div>
+        </ModalContainer>
     );
 }
