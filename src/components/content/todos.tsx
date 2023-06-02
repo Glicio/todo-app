@@ -1,8 +1,10 @@
 import React, { useEffect } from "react";
 import { api } from "~/utils/api";
 import Todo from "./todo_component";
-import CategoryHeader from "./category_header";
 import AddTodo from "../forms/add_todo";
+import AddIcon from "../icons/add";
+import CategoryLabel from "../misc/category_label";
+import CloseIcon from "../icons/close";
 
 export default function Todos() {
     const todosQuery = api.todos.getUserTodos.useQuery({ excludeDone: false });
@@ -10,8 +12,9 @@ export default function Todos() {
         typeof todosQuery.data | undefined
     >();
     const [showAddTodo, setShowAddTodo] = React.useState(false);
-
-    const todoCount = api.todos.getTodoCount.useQuery();
+    const [selectedCategory, setSelectedCategory] = React.useState<string[]>(
+        []
+    );
 
     useEffect(() => {
         console.log(todosQuery.data);
@@ -28,38 +31,61 @@ export default function Todos() {
     return (
         <div>
             {showAddTodo ? <AddTodo close={() => setShowAddTodo(false)} /> : ""}
-            <div className="flex justify-center gap-2 p-2">
-                <button className="primary-button" onClick={() => setShowAddTodo(true)}>New to-do</button>
-                <button className="primary-button">New category</button>
-            </div>
-            <span>TO-DO count: {todoCount.data || "loading..."}/50</span>
-            <div className="p-2">
-                {todos?.categories &&
-                    todos.categories.map((category) => (
-                        <div key={category.id}>
-                            <CategoryHeader category={category} />
-                            <div className="py-4">
-                                {todos.todos &&
-                                    todos.todos
-                                        .filter(
-                                            (todo) =>
-                                                todo.categoryId ===
-                                                    category.id && !todo.done
+            {!showAddTodo && (
+                <button
+                    onClick={() => setShowAddTodo(true)}
+                    className="fixed bottom-20 right-4 z-10 rounded-full bg-[var(--secondary-color)] text-gray-300"
+                >
+                    <AddIcon />
+                </button>
+            )}
+            <div className="flex flex-col gap-2 p-2 ">
+                <div>
+                    <div className="flex items-center gap-1">
+                        <span>Categories</span>
+                        {selectedCategory.length > 0 ? (
+                            <button className="h-4 w-4 text-xs" onClick={() => {setSelectedCategory([])}}>
+                                <CloseIcon />
+                            </button>
+                        ) : null}
+                    </div>
+                    <div className="thin-scroll flex gap-2 overflow-auto pb-2 pt-1">
+                        {todos?.categories &&
+                            todos.categories.map((category) => (
+                                <CategoryLabel
+                                    active={selectedCategory.includes(
+                                        category.id
+                                    )}
+                                    onClick={(categoryId) => {
+                                        if (
+                                            selectedCategory.includes(
+                                                category.id
+                                            )
                                         )
-                                        .map((todo) => (
-                                            <Todo key={todo.id} todo={todo} />
-                                        ))}
-                            </div>
-                        </div>
-                    ))}
-
-                <CategoryHeader category={{ name: "Done", color: "#aaa" }} />
-                <div className="py-4">
-                    {todos?.todos &&
-                        todos.todos
-                            .filter((todo) => todo.done)
-                            .map((todo) => <Todo key={todo.id} todo={todo} />)}
+                                            return setSelectedCategory(
+                                                selectedCategory.filter(
+                                                    (id) => id !== categoryId
+                                                )
+                                            );
+                                        setSelectedCategory((old) => [
+                                            ...old,
+                                            categoryId,
+                                        ]);
+                                    }}
+                                    key={category.id}
+                                    category={category}
+                                />
+                            ))}
+                    </div>
                 </div>
+                <div className="my-2 border-b border-[var(--tertiary-color)]"></div>
+                {todos?.todos &&
+                    todos.todos
+                        .filter((todo) => {
+                            if (selectedCategory.length === 0) return true;
+                            return selectedCategory.includes(todo.categoryId);
+                        })
+                        .map((todo) => <Todo key={todo.id} todo={todo} />)}
             </div>
         </div>
     );
