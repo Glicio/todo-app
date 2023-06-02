@@ -58,13 +58,14 @@ const UserButton = () => {
 };
 
 export default function NavBar() {
+    const {data: session} = useSession()
     return (
     <>
         <div className="h-12 w-full"></div>
         <div className="fixed z-20 bg-[var(--primary-color)] top-0 left-0 bg-primary flex h-12 w-full items-center border-b border-[var(--tertiary-color)] p-4">
             <div className="flex gap-4 items-center">
                 <span className="font-bold text-[var(--secondary-color)]">JET</span>
-                <TeamSelect />
+                {session?.user ? <TeamSelect /> : null}
             </div>
             <div className="ml-auto">
                 <UserButton />
