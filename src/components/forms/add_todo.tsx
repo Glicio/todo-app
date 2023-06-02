@@ -1,6 +1,7 @@
 import React from "react";
 import { api } from "~/utils/api";
 import DefaultForm from "./default_form";
+import { DateTimePicker } from "@mantine/dates";
 
 interface TodoState {
     title: string;
@@ -32,12 +33,12 @@ export default function AddTodo({ close }: { close: () => void }) {
     const categoriesQuery = api.category.getUserCategories.useQuery();
     const [selectedCategory, setSelectedCategory] = React.useState<string>("");
     const [todo, dispatch] = React.useReducer(todoReducer, todoInitialState);
-
+    const [activeDate, setActiveDate] = React.useState(false);
     React.useEffect(() => {
         console.log(todo);
     }, [todo]);
     return (
-        <div className="modal absolute left-0 top-0 flex min-h-screen min-w-screen w-screen h-screen items-center justify-center backdrop-blur" onClick={(e) => {
+        <div className="modal z-10 absolute left-0 top-0 flex w-screen min-h-screen backdrop-blur" onClick={(e) => {
             const target = e.target as HTMLElement;
             if (target.classList.contains("modal")) {
                 close();
@@ -84,21 +85,27 @@ export default function AddTodo({ close }: { close: () => void }) {
                         className="primary-text-area"
                         placeholder="I have to do something..."
                     ></textarea>
-
-                    <label htmlFor="dueDate">Due date</label>
+                    
                     <div className="flex gap-2">
-                        <input
-                            type="date"
-                            className="primary-text-input w-full"
-                            value={todo.dueDate ? todo.dueDate.toISOString().split("T")[0] : ""}
-                            onChange={(e) => {
-                                dispatch({
-                                    type: "dueDate",
-                                    payload: e.target.valueAsDate || "",
-                                });
-                            }}
+                    <label htmlFor="duedate">Due date</label>
+                        <input type="checkbox"
+                            checked={activeDate}
+                            onChange={() => setActiveDate((old) => !old)}
+                            className="rounded-md"
                         />
                     </div>
+                    <DateTimePicker
+                    placeholder="Pick date and time"
+                    value={todo.dueDate}
+                            aria-disabled={!activeDate}
+                            disabled={!activeDate}
+                            className="bg-white rounded-md"
+                                onChange={(value) =>{
+                                    if(!value) return
+                                        dispatch({ type: "dueDate", payload: new Date(value?.toISOString()) })
+                                }
+                                }
+                            />
 
                     <div className="items-centert mx-auto mt-4 flex justify-center gap-2 ">
                         <button
