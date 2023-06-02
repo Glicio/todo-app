@@ -2,7 +2,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import React from "react";
 import TeamSelect from "../input/team_select";
-import UserIcon from "../user/user_icon";
+import UserIcon from "../icons/user_icon";
 
 const UserMenu = () => {
     const { data: session } = useSession();
