@@ -14,7 +14,7 @@ export default function ModalContainer({
         return null;
     }
     return (
-        <div className="modal border z-[999] fixed left-0 top-0 flex w-screen h-screen backdrop-blur overflow-y-auto scroll-thin" onClick={(e) => {
+        <div className="modal z-[999] fixed left-0 top-0 flex w-screen h-screen backdrop-blur overflow-y-auto scroll-thin" onClick={(e) => {
             const target = e.target as HTMLElement;
             if (target.classList.contains("modal")) {
                onClose();
