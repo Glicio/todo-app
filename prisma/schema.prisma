@@ -11,8 +11,6 @@ datasource db {
   relationMode = "prisma"
 }
 
-
-// Necessary for Next auth
 model Account {
     id                String  @id @default(cuid())
     userId            String
@@ -31,35 +29,22 @@ model Account {
     @@index([userId])
     @@unique([provider, providerAccountId])
 }
+model Team {
+    id        String   @id @default(cuid())
+    name      String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    image  String?
+    owner     User     @relation(name: "teamsCreated" ,fields: [ownerId], references: [id], onDelete: Cascade)
+    ownerId   String
+    todos     Todo[]
+    categories    Category[]
+    users     User[]
 
-model Todo {
-    id          String   @id @default(cuid())
-    title       String
-    description String? @db.Text
-    user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId      String
-    categoryId  String?
-    category    Category? @relation(fields: [categoryId], references: [id])
-    done        Boolean  @default(false)
-    dueDate     DateTime?
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime? @updatedAt
 
-    @@index([userId])
-    @@index([categoryId])
+    @@index([ownerId])
+
 }
-
-model Category {
-    id          String   @id @default(cuid())
-    name        String
-    description String?
-    user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId      String
-    todos       Todo[]
-    color       String?
-    @@index([userId])
-}
-
 model Session {
     id           String   @id @default(cuid())
     sessionToken String   @unique
@@ -70,15 +55,82 @@ model Session {
     @@index([userId])
 }
 
+model Todo {
+    id          String   @id @default(cuid())
+    //content
+    title       String
+    description String? @db.Text
+    done        Boolean  @default(false)
+    dueDate     DateTime?
+    //timestamps
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime? @updatedAt
+    //relationships
+    //todos can be owned by a user or a team
+    user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId      String?
+    //but is always created by a user
+    createdBy   User     @relation("todoCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+    createdById String
+    //and can be updated by a user
+    updatedBy   User?    @relation("todoUpdatedBy", fields: [updatedById], references: [id], onDelete: Cascade)
+    updatedById String?
+
+    categoryId  String?
+    category    Category? @relation(fields: [categoryId], references: [id])
+
+    teamId      String?
+    team        Team?    @relation(fields: [teamId], references: [id])
+
+    assignedTo  User?    @relation("todosAssigned",fields: [assignedToId], references: [id], onDelete: Cascade)
+    assignedToId String?
+
+
+    @@index([assignedToId])
+    @@index([updatedById])
+    @@index([createdById])
+    @@index([teamId])
+    @@index([userId])
+    @@index([categoryId])
+}
+
+model Category {
+    id          String   @id @default(cuid())
+    name        String
+    description String?
+    color       String?
+
+    //relationships
+    team        Team?     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+    teamId      String?
+    user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId      String?
+    todos       Todo[]
+
+    @@index([teamId])
+    @@index([userId])
+}
+
+
 model User {
     id            String    @id @default(cuid())
     name          String?
     email         String?   @unique
     emailVerified DateTime?
     image         String?
+
+    //relationships
+    teams         Team[]
+    teamsCreated  Team[]    @relation("teamsCreated")
+
     accounts      Account[]
     sessions      Session[]
+
     todos         Todo[]
+    todosCreated  Todo[]    @relation("todoCreatedBy")
+    todosUpdated  Todo[]    @relation("todoUpdatedBy")
+    todosAssigned Todo[]    @relation("todosAssigned")
+
     categories    Category[]
 }
 
