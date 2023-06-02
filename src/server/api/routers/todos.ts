@@ -3,11 +3,10 @@ import { TRPCError } from "@trpc/server";
 
 import {
     createTRPCRouter,
-    publicProcedure,
     protectedProcedure,
 } from "~/server/api/trpc";
 import { db } from "~/server/db";
-import { CategoryResponse, TodoResponse } from "~/utils/db_responses";
+import type { CategoryResponse, TodoResponse } from "~/utils/db_responses";
 
 
 
