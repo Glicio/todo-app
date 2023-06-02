@@ -3,11 +3,10 @@ import { TRPCError } from "@trpc/server";
 
 import {
     createTRPCRouter,
-    publicProcedure,
     protectedProcedure,
 } from "~/server/api/trpc";
 import { db } from "~/server/db";
-import { CategoryResponse } from "~/utils/db_responses";
+import type { CategoryResponse } from "~/utils/db_responses";
 
 
 
@@ -22,7 +21,7 @@ export const category = createTRPCRouter({
         try {
             const query = await db.execute(smt, [ctx.session.user.id]);
             const rows = query.rows as count[];
-            if(!query || !rows[0]) throw new TRPCError({ code: "NOT_FOUND", message: "Categories not found" })
+            if(!query || !rows[0]) return 0
             const count = rows[0]["count(*)"] ? rows[0]["count(*)"] : 0
             return count
         } catch (e) {
@@ -42,7 +41,7 @@ export const category = createTRPCRouter({
             try {
                 const query = await db.execute(smt, [ctx.session.user.id]);
                 const rows = query.rows as CategoryResponse[];
-                if (!query || !rows[0]) throw new TRPCError({ code: "NOT_FOUND", message: "Categories not found" })
+                if (!query || !rows[0]) return [];
                 return rows
             } catch (e) {
                 console.log(e);
