@@ -14,8 +14,10 @@ export default function DefaultForm({
         <form
             action=""
             className={`
-            flex flex-col w-screen h-screen min-w-screen min-h-screen 
-            items-center justify-center bg-[var(--primary-color)] 
+            flex flex-col w-screen min-w-screen min-h-screen 
+            items-center bg-[var(--primary-color)] 
+            m-auto
+            py-4
             md:rounded-md 
             md:p-4 
             md:shadow-md md:w-fit md:h-fit
