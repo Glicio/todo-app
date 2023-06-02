@@ -8,11 +8,11 @@ const UserMenu = () => {
     const { data: session } = useSession();
 
     return (
-        <div className="absolute right-2 top-10 flex w-40 flex-col gap-2 rounded bg-gray-800 p-4">
+        <div className="absolute right-2 top-10 flex w-40 flex-col gap-2 rounded bg-[var(--primary-color)] border border-[var(--tertiary-color)] p-4">
             <span>Hi, {session?.user?.name || "User"}</span>
-            <div className="border-b"></div>
+            <div className="border-b border-[var(--tertiary-color)]"></div>
             <button
-                className="primary-button"
+                className="secondary-button"
                 onClick={() => {
                     void signOut();
                 }}
@@ -71,8 +71,10 @@ const UserButton = () => {
 export default function NavBar() {
     return (
         <div className="bg-primary flex h-12 w-full items-center border-b border-[var(--tertiary-color)] p-4">
-            <span className="font-bold text-[var(--secondary-color)]">JET</span>
-            <TeamSelect />
+            <div className="flex gap-4 items-center">
+                <span className="font-bold text-[var(--secondary-color)]">JET</span>
+                <TeamSelect />
+            </div>
             <div className="ml-auto">
                 <UserButton />
             </div>
