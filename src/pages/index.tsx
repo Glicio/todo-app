@@ -1,4 +1,5 @@
 import { type NextPage } from "next";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Todos from "~/components/content/todos";
 
@@ -6,6 +7,8 @@ import NavBar from "~/components/navigation/nav_bar";
 import Navigation from "~/components/navigation/navigation";
 
 const Home: NextPage = () => {
+
+    const { data: session } = useSession();
 
   return (
     <>
@@ -16,7 +19,7 @@ const Home: NextPage = () => {
       </Head>
       <main className="flex min-h-screen flex-col bg-[var(--primary-color)] text-white">
         <NavBar />
-        <Todos /> 
+        {session?.user ? <Todos /> : <>NOT AUTHED</>}
         <Navigation />
       </main>
     </>
