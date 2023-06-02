@@ -35,7 +35,7 @@ model Account {
 model Todo {
     id          String   @id @default(cuid())
     title       String
-    description String?
+    description String? @db.Text
     user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
     userId      String
     categoryId  String?
