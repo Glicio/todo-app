@@ -139,17 +139,17 @@ const AddTeam = ({
                             dispatch({ type: "color", payload: color });
                         }}
                     />
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 w-full">
                         <button
                             type="button"
-                            className="secondary-button"
+                            className="secondary-button w-1/2"
                             onClick={close}
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="primary-button"
+                            className="primary-button w-1/2"
                             disabled={createTeamMutation.isLoading}
                         >
                             <div className="flex justify-center">
