@@ -238,4 +238,77 @@ export const todos = createTRPCRouter({
                 });
             }
         }),
+        /**
+        * delete a todo
+        * */
+    deleteTodo: protectedProcedure
+        .input(z.object({ 
+                id: z.string() ,
+                agentType: z.enum(["user", "team"]),
+                agentId: z.string(),
+        }))
+        .mutation(async ({ ctx, input }) => {
+                        if(!ctx.session.user) throw new TRPCError({code: "UNAUTHORIZED"});
+                        if(input.agentType === "team"){
+                            if(!(await checkUserInTeam({userId: ctx.session.user.id, teamId: input.agentId}))){
+                                throw new TRPCError({code: "UNAUTHORIZED"});
+                            }
+                        }
+                        if(input.agentType === "user"){
+                            if(ctx.session.user.id !== input.agentId){
+                                throw new TRPCError({code: "UNAUTHORIZED"});
+                            }
+                        }
+                        try{
+                            const todo = await prisma.todo.delete({
+                                where: {id: input.id}
+                            });
+                            return todo;
+                        }catch(e){
+                            console.log(e);
+                            throw new TRPCError({code: "INTERNAL_SERVER_ERROR", message: "Error while deleting todo"});
+
+                        }
+
+        }),
+    markAsDone: protectedProcedure
+        .input(
+            z.object({
+                todoId: z.string(),
+                agentType: z.enum(["user", "team"]),
+                agentId: z.string(),
+            })
+        )
+        .mutation(async ({ ctx, input }) => {
+            if(!ctx.session.user) throw new TRPCError({code: "UNAUTHORIZED"});
+            if(input.agentType === "team"){
+                if(!(await checkUserInTeam({userId: ctx.session.user.id, teamId: input.agentId}))){
+                    throw new TRPCError({code: "UNAUTHORIZED"});
+                }
+            }
+            if(input.agentType === "user"){
+                if(ctx.session.user.id !== input.agentId){
+                    throw new TRPCError({code: "UNAUTHORIZED"});
+                }
+            }
+            try{
+                const todo = await prisma.todo.update({
+                    where: {id: input.todoId},
+                    data: {
+                        done: true,
+                        doneAt: new Date(),
+                        doneBy: {
+                            connect: {
+                                id: ctx.session.user.id,
+                            }
+                        }
+                    }
+                });
+                return todo;               
+            } catch(e){
+                console.log(e);
+                throw new TRPCError({code: "INTERNAL_SERVER_ERROR", message: "Error while marking todo as done"});
+            }
+        }),
+                    
 });
