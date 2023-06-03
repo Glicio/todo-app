@@ -39,7 +39,7 @@ export const teams = createTRPCRouter({
             color: z.string().regex(/^#[0-9A-F]{6}$/i),
         })).mutation(async ({input, ctx}) => {
         
-            const userTeamsCountSmt = `SELECT COUNT(*) FROM Team WHERE ownerId = ?`;
+            const userTeamsCountSmt = `SELECT count(*) FROM Team WHERE ownerId = ?`;
             const userTeamsCount = await db.execute(userTeamsCountSmt, [ctx.session.user.id]);
             if(!userTeamsCount.rows[0]) {
                 throw new TRPCError({
@@ -47,7 +47,7 @@ export const teams = createTRPCRouter({
                     message: 'Error getting user teams count',
                 });
             }
-            if (userTeamsCount.rows[0]['COUNT(*)' as keyof typeof userTeamsCount.rows[0]] >= 3) {
+            if (userTeamsCount.rows[0]['count(*)' as keyof typeof userTeamsCount.rows[0]] >= 3) {
                 throw new TRPCError({code: "BAD_REQUEST", message: 'You can only create 3 teams'});
             }
 
