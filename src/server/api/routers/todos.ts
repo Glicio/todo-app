@@ -103,7 +103,6 @@ export const todos = createTRPCRouter({
                             : { name: undefined, id: undefined },
                     };
                 });
-
                 return {
                     todos: todosWithCategory,
                     categories: categories.map((category) => {
