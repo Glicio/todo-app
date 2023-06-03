@@ -140,15 +140,15 @@ export default function AddTodo({ opened, close }: {opened: boolean, close: () =
                                 }
                             />
 
-                    <div className="items-centert mx-auto mt-4 flex justify-center gap-2 ">
+                    <div className="items-centert mx-auto mt-4 w-full flex justify-center gap-2 ">
                         <button
                             type="button"
-                            className="secondary-button"
+                            className="secondary-button w-1/2"
                             onClick={close}
                         >
                             Cancel
                         </button>
-                        <button type="submit" className="primary-button" disabled={addTodo.isLoading}>{addTodo.isLoading ? <LoadingIcon/> :  "Save"}</button>
+                        <button type="submit" className="primary-button w-1/2" disabled={addTodo.isLoading}>{addTodo.isLoading ? <LoadingIcon/> :  "Save"}</button>
                     </div>
                 </div>
             </DefaultForm>
