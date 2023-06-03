@@ -40,24 +40,54 @@ export const todos = createTRPCRouter({
     getUserTodos: protectedProcedure
         .input(
             z.object({
+                agentType: z.enum(["user", "team"]),
+                agentId: z.string(),
                 excludeDone: z.boolean().optional(),
             })
         )
         .query(async ({ ctx, input }) => {
-            if (!ctx.session.user)
+            const { agentType, agentId } = input;
+
+            if (agentType === "team") {
+                const team = await prisma.team.findMany({
+                    where: {
+                        id: agentId,
+                        users: {
+                            some: {
+                                id: ctx.session.user.id,
+                            },
+                        },
+                    },
+                });
+                if (!team) throw new TRPCError({ code: "UNAUTHORIZED" });
+            } else {
+
+                if (!ctx.session.user)
+                    throw new TRPCError({ code: "UNAUTHORIZED" });
+
+                if (ctx.session.user.id !== agentId)
+                    throw new TRPCError({ code: "UNAUTHORIZED" });
+            }
+
+            if (!ctx.session.user) {
                 throw new TRPCError({ code: "UNAUTHORIZED" });
-            const todoSmt = `SELECT * FROM Todo WHERE userId = ? ${
+            }
+
+            const column = agentType === "user" ? "userId" : "teamId";
+
+            const todoSmt = `SELECT * FROM Todo WHERE ${column} = ? ${
                 input.excludeDone ? "AND Todo.done = 1" : ""
             };`;
-            const categorySmt = `SELECT * FROM Category WHERE userId = ?;`;
+            const categorySmt = `SELECT * FROM Category WHERE ${column} = ?;`;
+
             try {
                 const todoQuery = await db.execute(todoSmt, [
-                    ctx.session.user.id,
+                    agentId,
                 ]);
                 const todos = todoQuery.rows as TodoResponse[];
 
                 const categoryQuery = await db.execute(categorySmt, [
-                    ctx.session.user.id,
+                    agentId,
                 ]);
                 const categories = categoryQuery.rows as CategoryResponse[];
 
@@ -116,30 +146,58 @@ export const todos = createTRPCRouter({
             })
         )
         .mutation(async ({ ctx, input }) => {
-            const { title, dueDate, description, categoryId, userId, teamId, assignedUserId } = input;
+            const {
+                title,
+                dueDate,
+                description,
+                categoryId,
+                userId,
+                teamId,
+                assignedUserId,
+            } = input;
             if (!ctx.session.user)
                 throw new TRPCError({ code: "UNAUTHORIZED" });
-            if(
+            if (
                 (input.userId && input.teamId) ||
                 (!input.userId && !input.teamId)
-            ) throw new TRPCError({ code: "BAD_REQUEST", message: "Either userId or teamId must be provided" });
-            
-            if(input.userId) {
+            )
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "Either userId or teamId must be provided",
+                });
+
+            if (input.userId) {
                 const counterSMT = `SELECT COUNT(*) FROM Todo WHERE userId = ?;`;
-                const countUserTodos = await db.execute(counterSMT, [ctx.session.user.id]);
-                if(!countUserTodos || !countUserTodos.rows[0]) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Error while fetching todos" });
+                const countUserTodos = await db.execute(counterSMT, [
+                    ctx.session.user.id,
+                ]);
+                if (!countUserTodos || !countUserTodos.rows[0])
+                    throw new TRPCError({
+                        code: "INTERNAL_SERVER_ERROR",
+                        message: "Error while fetching todos",
+                    });
                 const count = getCountFromDBQuery(countUserTodos.rows);
-                if(count >= 50) {
-                    throw new TRPCError({ code: "BAD_REQUEST", message: "User has too many todos" });
+                if (count >= 50) {
+                    throw new TRPCError({
+                        code: "BAD_REQUEST",
+                        message: "User has too many todos",
+                    });
                 }
             }
-            if(input.teamId) {
+            if (input.teamId) {
                 const counterSMT = `SELECT COUNT(*) FROM Todo WHERE teamId = ?;`;
                 const countUserTodos = await db.execute(counterSMT, [teamId]);
-                if(!countUserTodos || !countUserTodos.rows[0]) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Error while fetching todos" });
+                if (!countUserTodos || !countUserTodos.rows[0])
+                    throw new TRPCError({
+                        code: "INTERNAL_SERVER_ERROR",
+                        message: "Error while fetching todos",
+                    });
                 const count = getCountFromDBQuery(countUserTodos.rows);
-                if(count >= 50) {
-                    throw new TRPCError({ code: "BAD_REQUEST", message: "User has too many todos" });
+                if (count >= 50) {
+                    throw new TRPCError({
+                        code: "BAD_REQUEST",
+                        message: "User has too many todos",
+                    });
                 }
             }
 
@@ -155,14 +213,19 @@ export const todos = createTRPCRouter({
                                 id: ctx.session.user.id,
                             },
                         },
-                        category: categoryId ? { connect: { id: categoryId, } } : undefined,
-                        user: userId ? { connect: { id: ctx.session.user.id, } } : undefined,
-                        team: teamId ? { connect: { id: teamId, } } : undefined,
-                        assignedTo:  assignedUserId ? { connect: { id: assignedUserId, } } : undefined,
+                        category: categoryId
+                            ? { connect: { id: categoryId } }
+                            : undefined,
+                        user: userId
+                            ? { connect: { id: ctx.session.user.id } }
+                            : undefined,
+                        team: teamId ? { connect: { id: teamId } } : undefined,
+                        assignedTo: assignedUserId
+                            ? { connect: { id: assignedUserId } }
+                            : undefined,
                     },
                 });
-                return todo
-
+                return todo;
             } catch (e) {
                 console.log(e);
                 throw new TRPCError({
