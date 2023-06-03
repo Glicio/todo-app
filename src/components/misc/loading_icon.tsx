@@ -2,8 +2,8 @@ import { Loader } from "@mantine/core";
 import React from "react";
 
 
-export default function LoadingIcon() {
+export default function LoadingIcon({color}: {color: string}) {
     return (
-        <Loader color="var(--tertiary-color)" size="sm"/>
+        <Loader color={color ? color : "var(--tertiary-color)"} size="sm"/>
     )
 }
