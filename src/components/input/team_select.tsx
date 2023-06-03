@@ -60,7 +60,7 @@ const AddTeam = ({
                 title: "Team created",
                 message: "Team created successfully",
                 color: "green",
-                autoClose: 3000,
+                autoClose: 1000,
             });
             close();
         },
