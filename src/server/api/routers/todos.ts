@@ -5,9 +5,11 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { db, prisma } from "~/server/db";
 import type { CategoryResponse, TodoResponse } from "~/utils/db_responses";
 import getCountFromDBQuery from "~/utils/getCountFromDBQuery";
+import checkUserInTeam from "~/utils/check_usr_in_team";
 
 export const todos = createTRPCRouter({
     /**
+     * needs to be updated to the new agent mode
      * returns the count of todos for the current user
      * */
     getTodoCount: protectedProcedure.query(async ({ ctx }) => {
@@ -61,7 +63,6 @@ export const todos = createTRPCRouter({
                 });
                 if (!team) throw new TRPCError({ code: "UNAUTHORIZED" });
             } else {
-
                 if (!ctx.session.user)
                     throw new TRPCError({ code: "UNAUTHORIZED" });
 
@@ -81,14 +82,10 @@ export const todos = createTRPCRouter({
             const categorySmt = `SELECT * FROM Category WHERE ${column} = ?;`;
 
             try {
-                const todoQuery = await db.execute(todoSmt, [
-                    agentId,
-                ]);
+                const todoQuery = await db.execute(todoSmt, [agentId]);
                 const todos = todoQuery.rows as TodoResponse[];
 
-                const categoryQuery = await db.execute(categorySmt, [
-                    agentId,
-                ]);
+                const categoryQuery = await db.execute(categorySmt, [agentId]);
                 const categories = categoryQuery.rows as CategoryResponse[];
 
                 const todosWithCategory = todos.map((todo) => {
@@ -137,11 +134,11 @@ export const todos = createTRPCRouter({
         .input(
             z.object({
                 title: z.string(),
-                dueDate: z.string().optional(),
+                dueDate: z.date().optional(),
                 description: z.string().optional(),
                 categoryId: z.string().optional(),
-                userId: z.string().optional(),
-                teamId: z.string().optional(),
+                agentType: z.enum(["user", "team"]),
+                agentId: z.string(),
                 assignedUserId: z.string().optional(),
             })
         )
@@ -151,22 +148,25 @@ export const todos = createTRPCRouter({
                 dueDate,
                 description,
                 categoryId,
-                userId,
-                teamId,
+                agentType,
+                agentId,
                 assignedUserId,
             } = input;
             if (!ctx.session.user)
                 throw new TRPCError({ code: "UNAUTHORIZED" });
-            if (
-                (input.userId && input.teamId) ||
-                (!input.userId && !input.teamId)
-            )
-                throw new TRPCError({
-                    code: "BAD_REQUEST",
-                    message: "Either userId or teamId must be provided",
-                });
 
-            if (input.userId) {
+            if (agentType === "team") {
+                if (
+                    !(await checkUserInTeam({
+                        userId: ctx.session.user.id,
+                        teamId: agentId,
+                    }))
+                ) {
+                    throw new TRPCError({ code: "UNAUTHORIZED" });
+                }
+            }
+
+            if (agentType === "user") {
                 const counterSMT = `SELECT COUNT(*) FROM Todo WHERE userId = ?;`;
                 const countUserTodos = await db.execute(counterSMT, [
                     ctx.session.user.id,
@@ -184,9 +184,11 @@ export const todos = createTRPCRouter({
                     });
                 }
             }
-            if (input.teamId) {
+            if (agentType === "team") {
                 const counterSMT = `SELECT COUNT(*) FROM Todo WHERE teamId = ?;`;
-                const countUserTodos = await db.execute(counterSMT, [teamId]);
+                const countUserTodos = await db.execute(counterSMT, [
+                    input.agentId,
+                ]);
                 if (!countUserTodos || !countUserTodos.rows[0])
                     throw new TRPCError({
                         code: "INTERNAL_SERVER_ERROR",
@@ -207,7 +209,6 @@ export const todos = createTRPCRouter({
                         title: title,
                         dueDate: dueDate,
                         description: description,
-                        done: false,
                         createdBy: {
                             connect: {
                                 id: ctx.session.user.id,
@@ -216,10 +217,14 @@ export const todos = createTRPCRouter({
                         category: categoryId
                             ? { connect: { id: categoryId } }
                             : undefined,
-                        user: userId
-                            ? { connect: { id: ctx.session.user.id } }
-                            : undefined,
-                        team: teamId ? { connect: { id: teamId } } : undefined,
+                        user:
+                            agentType === "user"
+                                ? { connect: { id: ctx.session.user.id } }
+                                : undefined,
+                        team:
+                            agentType === "team"
+                                ? { connect: { id: agentId } }
+                                : undefined,
                         assignedTo: assignedUserId
                             ? { connect: { id: assignedUserId } }
                             : undefined,
