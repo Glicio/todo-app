@@ -1,4 +1,4 @@
-import React  from "react";
+import React from "react";
 import { api } from "~/utils/api";
 import Todo from "./todo_component";
 import AddTodo from "../forms/add_todo";
@@ -6,6 +6,8 @@ import AddIcon from "../icons/add";
 import CategoryLabel from "../misc/category_label";
 import CloseIcon from "../icons/close";
 import { userContext } from "~/contexts/UserProvider";
+import { type Todo as DBTodo } from "@prisma/client";
+
 
 export default function Todos() {
     const { agent, agentType } = React.useContext(userContext);
@@ -38,9 +40,24 @@ export default function Todos() {
             </div>
         );
 
+    const removeTodo = (id: string) => {
+        setTodos((old) => {
+            if (!old) return undefined;
+            return {
+                ...old,
+                todos: old.todos.filter((t) => t.id !== id),
+            };
+        });
+    };
+
+
     return (
         <div>
-            <AddTodo close={() => setShowAddTodo(false)} opened={showAddTodo} />
+            <AddTodo
+                close={() => setShowAddTodo(false)}
+                opened={showAddTodo}
+                onSave={() => void todosQuery.refetch()}
+            />
             {!showAddTodo && (
                 <button
                     onClick={() => setShowAddTodo(true)}
@@ -107,7 +124,21 @@ export default function Todos() {
                             if (selectedCategory.length === 0) return true;
                             return selectedCategory.includes(todo.categoryId);
                         })
-                        .map((todo) => <Todo key={todo.id} todo={todo} />)}
+                        .map((todo) => (
+                            <Todo
+                                key={todo.id}
+                                todo={todo}
+                                onDelete={(id) => {
+                                    removeTodo(id);
+                                }}
+                                onDone={(id) => {
+                                    removeTodo(id);
+                                }}
+                                onEdit={() => {
+                                    void todosQuery.refetch();
+                                }}
+                            />
+                        ))}
                 <div className="h-14 w-full"></div>
             </div>
         </div>

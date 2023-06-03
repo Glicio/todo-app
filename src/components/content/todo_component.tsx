@@ -3,22 +3,22 @@ import Trash from "../icons/trash";
 import Check from "../icons/check";
 import Undo from "../icons/undo";
 import Edit from "../icons/edit";
-
-const toggleAnimation = (setStep: (step: number) => void) => {
-    setStep(1);
-    setTimeout(() => {
-        setStep(2);
-    }, 100);
-    setTimeout(() => {
-        setStep(3);
-    }, 200);
-};
+import { api } from "~/utils/api";
+import { userContext } from "~/contexts/UserProvider";
+import { notifications } from "@mantine/notifications";
+import { type Todo } from "@prisma/client";
+import ModalContainer from "../containers/modal_container";
+import { useDisclosure } from "@mantine/hooks";
+import LoadingIcon from "../misc/loading_icon";
 
 /**
  * The main todo component.
  * */
 export default function Todo({
     todo,
+    onDelete,
+    onEdit,
+    onDone,
 }: {
     todo: {
         category: {
@@ -34,22 +34,100 @@ export default function Todo({
         dueDate: string | undefined;
         updatedAt: string | undefined;
     };
+    onDelete: (id: string) => void;
+    onEdit: (todo: Todo) => void;
+    onDone: (id: string) => void;
 }) {
+    const { agent, agentType } = React.useContext(userContext);
     const [todoActive, setTodoActive] = React.useState(false);
+    const [fade, setFade] = React.useState(false);
+    const [
+        confirmDelete,
+        { open: openConfirmDelete, close: closeConfirmDelete },
+    ] = useDisclosure();
+
+    const deleteMutation = api.todos.deleteTodo.useMutation({
+        onSuccess: () => {
+            notifications.show({
+                color: "green",
+                title: "Todo deleted",
+                message: "Todo was deleted successfully",
+                autoClose: 1000,
+            });
+            setFade(true);
+            setTimeout(() => {
+                onDelete(todo.id as string);
+            }, 100);
+        },
+        onError: (error) => {
+            notifications.show({
+                color: "red",
+                title: "Todo not deleted",
+                message: error.message,
+                autoClose: 1000,
+            });
+        },
+    });
+
+    const doMutation = api.todos.markAsDone.useMutation({
+        onError: (error) => {
+            notifications.show({
+                color: "red",
+                title: "Todo not updated",
+                message: error.message,
+                autoClose: 1000,
+            });
+        },
+        onSuccess: () => {
+            setFade(true);
+            setTimeout(() => {
+                onDone(todo.id as string);
+            }, 100);
+        }
+
+    })
     return (
-        <div
-            key={todo.id}
-            className={`rounded-md border transition-all`}
-            style={{
-                borderColor: todo.category.color
-                    ? todo.category.color
-                    : "grey",
-            }}
-        >
+        <div key={todo.id} className={`flex flex-col ${fade ? "fadeOut" : ""}`}>
+            <ModalContainer opened={confirmDelete} onClose={closeConfirmDelete}>
+                <div className="m-auto flex h-fit w-fit flex-col items-center justify-center gap-4 rounded-md border bg-[var(--primary-color)] p-2">
+                    <h1 className="text-2xl font-bold">Delete todo</h1>
+                    <p>Are you sure you want to delete this todo?</p>
+                    <div className="flex w-full justify-center gap-4">
+                        <button
+                            onClick={() => closeConfirmDelete()}
+                            className="secondary-button w-1/2"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            className="primary-button w-1/2"
+                            onClick={() => {
+                                if (!agent || !agentType || !todo.id) return;
+                                deleteMutation.mutate({
+                                    id: todo.id,
+                                    agentId: agent.id,
+                                    agentType: agentType,
+                                });
+                            }}
+                        >
+                            {deleteMutation.isLoading ? (
+                                <LoadingIcon />
+                            ) : (
+                                "Confirm"
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </ModalContainer>
+
             <button
-                className="todo-header w-full"
+                className={`todo-header w-full rounded-t-md border ${todoActive ? "rounded-b-none" : "rounded-b-md"
+                    }`}
                 onClick={() => setTodoActive((old) => !old)}
                 style={{
+                    borderColor: todo.category.color
+                        ? todo.category.color
+                        : "gray",
                     backgroundColor: todoActive
                         ? todo.category.color
                             ? todo.category.color
@@ -59,48 +137,74 @@ export default function Todo({
             >
                 {todo.title}
             </button>
-                <div
-                    className="todo-body overflow-hidden transition-all ease-in-out "
-                    style={{
-                        maxHeight: todoActive ? "1000px" : "0px",
-                    }}
-                >
-
-            {todo.description || todo.dueDate ? (
-                    <div className="p-2">
-                        {todo.dueDate ? <span>{new Date(todo.dueDate).toLocaleDateString()}</span> : null}
-                        <p className="max-h-[18rem] overflow-y-auto thin-scroll">{todo.description}</p>
-                    </div>
-
-            ) : null}
+            <div
+                className="todo-body overflow-hidden transition-all ease-in-out"
+                style={{
+                    borderColor: todo.category.color
+                        ? todo.category.color
+                        : "grey",
+                    maxHeight: todoActive ? "1000px" : "0px",
+                }}
+            >
+                {todo.description || todo.dueDate ? (
                     <div
-                        className="flex w-full justify-center gap-8 p-2"
+                        className="border-x border-t p-2"
                         style={{
-                            borderTop: `1px solid ${
-                                todo.category.color ? todo.category.color : "grey"
-                            }`,
                             borderColor: todo.category.color
                                 ? todo.category.color
-                                : "",
+                                : "gray",
                         }}
                     >
-                        <button className="flex gap-2 text-red-400">
-                            <Trash /> Delete
-                        </button>
-                        <button className="flex gap-2 text-yellow-400">
-                        <Edit/> Edit
-                        </button>
-                        {todo.done ? (
-                            <button className="flex gap-2">
-                                <Undo /> Undo
-                            </button>
-                        ) : (
-                            <button className="flex items-center gap-2 text-green-400">
-                                <Check /> Done
-                            </button>
-                        )}
+                        {todo.dueDate ? (
+                            <span>
+                                {new Date(todo.dueDate).toLocaleDateString()}
+                            </span>
+                        ) : null}
+                        <p className="thin-scroll max-h-[18rem] overflow-y-auto ">
+                            {todo.description}
+                        </p>
                     </div>
+                ) : null}
+                <div
+                    className="flex w-full items-center justify-center gap-8 rounded-b-md border border-x p-2"
+                    style={{
+                        borderColor: todo.category.color
+                            ? todo.category.color
+                            : "gray",
+                    }}
+                >
+                    <button
+                        onClick={() => {
+                            openConfirmDelete();
+                        }}
+                        className="flex items-center gap-2 text-red-400"
+                    >
+                        <Trash /> Delete
+                    </button>
+                    <button className="flex items-center gap-2 text-yellow-400">
+                        <Edit /> Edit
+                    </button>
+                    {todo.done ? (
+                        <button className="flex items-center gap-2">
+                            <Undo /> Undo
+                        </button>
+                    ) : (
+                        <button className="flex items-center gap-2 text-green-400" 
+                        disabled={doMutation.isLoading}
+                        onClick={() => {
+                            if (!agent || !agentType || !todo.id) return;
+                            doMutation.mutate({
+                                agentId: agent.id,
+                                agentType: agentType,
+                                todoId: todo.id
+                            })
+                        }
+                        }>
+                            {doMutation.isLoading ? <LoadingIcon/> : <Check />} Done
+                        </button>
+                    )}
                 </div>
+            </div>
         </div>
     );
 }
