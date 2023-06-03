@@ -254,6 +254,7 @@ export default function TeamSelect() {
                             </span>
                             <SelectButton
                                 onClick={() => {
+                                    setShowMenu(false)
                                     setAgent("user", {
                                         id: session?.user.id || "",
                                         name: session?.user.name || "User",
