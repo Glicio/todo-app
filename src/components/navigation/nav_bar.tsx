@@ -62,14 +62,12 @@ export default function NavBar() {
     return (
     <>
         <div className="h-12 w-full"></div>
-        <div className="fixed z-20 bg-[var(--primary-color)] top-0 left-0 bg-primary flex h-12 w-full items-center border-b border-[var(--tertiary-color)] p-4">
-            <div className="flex gap-4 items-center">
-                <span className="font-bold text-[var(--secondary-color)]">JET</span>
+        <div className="fixed z-20 bg-[var(--primary-color)] top-0 left-0 bg-primary flex h-12 w-full items-center border-b border-[var(--tertiary-color)] px-2 py-4">
+                <span className="font-bold text-[var(--secondary-color)] mr-2">JET</span>
                 {session?.user ? <TeamSelect /> : null}
-            </div>
-            <div className="ml-auto">
-                <UserButton />
-            </div>
+                <div className="ml-auto">
+                    <UserButton />
+                </div>
         </div>
         </>
     );
