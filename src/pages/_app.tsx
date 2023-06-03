@@ -6,6 +6,8 @@ import { api } from "~/utils/api";
 
 import "~/styles/globals.css";
 import { UserProvider } from "~/contexts/UserProvider";
+import { MantineProvider } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
 
 const MyApp: AppType<{ session: Session | null }> = ({
     Component,
@@ -13,9 +15,12 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
     return (
         <SessionProvider session={session}>
-            <UserProvider>
-                <Component {...pageProps} />
-            </UserProvider>
+            <MantineProvider withGlobalStyles withNormalizeCSS theme={{ colorScheme: 'dark'}}>
+                <Notifications/>
+                <UserProvider>
+                    <Component {...pageProps} />
+                </UserProvider>
+            </MantineProvider>
         </SessionProvider>
     );
 };

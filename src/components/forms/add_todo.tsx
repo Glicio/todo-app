@@ -81,7 +81,7 @@ export default function AddTodo({ opened, close }: {opened: boolean, close: () =
                         onChange={(e) => {
                             setSelectedCategory(e.target.value);
                         }}
-                        className="primary-select"
+                        className="primary-select bg-white"
                     >
                         <option value="">No category</option>
                         {categoriesQuery.data?.map((category) => (
