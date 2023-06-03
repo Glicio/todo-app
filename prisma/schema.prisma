@@ -66,6 +66,7 @@ model Todo {
     //timestamps
     createdAt   DateTime @default(now())
     updatedAt   DateTime? @updatedAt
+    doneAt      DateTime?
     //relationships
     //todos can be owned by a user or a team
     user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -73,9 +74,10 @@ model Todo {
     //but is always created by a user
     createdBy   User     @relation("todoCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
     createdById String
-    //and can be updated by a user
     updatedBy   User?    @relation("todoUpdatedBy", fields: [updatedById], references: [id], onDelete: Cascade)
     updatedById String?
+    doneBy      User?    @relation("todoDoneBy", fields: [doneById], references: [id], onDelete: Cascade)
+    doneById    String?
 
     categoryId  String?
     category    Category? @relation(fields: [categoryId], references: [id])
@@ -86,7 +88,8 @@ model Todo {
     assignedTo  User?    @relation("todosAssigned",fields: [assignedToId], references: [id], onDelete: Cascade)
     assignedToId String?
 
-
+    //indexes
+    @@index([doneById])
     @@index([assignedToId])
     @@index([updatedById])
     @@index([createdById])
@@ -128,6 +131,7 @@ model User {
     sessions      Session[]
 
     todos         Todo[]
+    todosDone     Todo[]    @relation("todoDoneBy")
     todosCreated  Todo[]    @relation("todoCreatedBy")
     todosUpdated  Todo[]    @relation("todoUpdatedBy")
     todosAssigned Todo[]    @relation("todosAssigned")
