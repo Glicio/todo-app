@@ -1,13 +1,22 @@
-import React, { useEffect } from "react";
+import React  from "react";
 import { api } from "~/utils/api";
 import Todo from "./todo_component";
 import AddTodo from "../forms/add_todo";
 import AddIcon from "../icons/add";
 import CategoryLabel from "../misc/category_label";
 import CloseIcon from "../icons/close";
+import { userContext } from "~/contexts/UserProvider";
 
 export default function Todos() {
-    const todosQuery = api.todos.getUserTodos.useQuery({ excludeDone: false });
+    const { agent, agentType } = React.useContext(userContext);
+
+    const todosQuery = api.todos.getUserTodos.useQuery(
+        { excludeDone: false, agentId: agent?.id || "", agentType: agentType },
+        {
+            enabled: !!agent && !!agentType,
+        }
+    );
+
     const [todos, setTodos] = React.useState<
         typeof todosQuery.data | undefined
     >();
@@ -16,21 +25,22 @@ export default function Todos() {
         []
     );
 
-    useEffect(() => {
-        console.log(todosQuery.data);
+    React.useEffect(() => {
         if (todosQuery.data) {
             setTodos(todosQuery.data);
         }
     }, [todosQuery.data]);
+
     if (todosQuery.isLoading)
         return (
             <div className="flex h-screen items-center justify-center">
                 <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-gray-900"></div>
             </div>
         );
+
     return (
         <div>
-            <AddTodo close={() => setShowAddTodo(false)} opened={showAddTodo}/> 
+            <AddTodo close={() => setShowAddTodo(false)} opened={showAddTodo} />
             {!showAddTodo && (
                 <button
                     onClick={() => setShowAddTodo(true)}
@@ -98,7 +108,7 @@ export default function Todos() {
                             return selectedCategory.includes(todo.categoryId);
                         })
                         .map((todo) => <Todo key={todo.id} todo={todo} />)}
-                        <div className="h-14 w-full"></div>
+                <div className="h-14 w-full"></div>
             </div>
         </div>
     );

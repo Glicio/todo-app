@@ -3,6 +3,8 @@ import { api } from "~/utils/api";
 import DefaultForm from "./default_form";
 import { DateTimePicker } from "@mantine/dates";
 import ModalContainer from "../containers/modal_container";
+import { userContext } from "~/contexts/UserProvider";
+import LoadingIcon from "../misc/loading_icon";
 
 interface TodoState {
     title: string;
@@ -31,7 +33,25 @@ const todoInitialState: TodoState = {
  * the form to add a new todo.
  * */
 export default function AddTodo({ opened, close }: {opened: boolean, close: () => void }) {
-    const categoriesQuery = api.category.getUserCategories.useQuery();
+    
+    const {agent, agentType} = React.useContext(userContext);
+
+    const categoriesQuery = api.category.getAgentCategories.useQuery({
+        agentId: agent?.id || "",
+        agentType: agentType,
+    }, {
+        enabled: !!agent && !!agentType,
+    });
+    
+    const addTodo = api.todos.createTodo.useMutation({
+        onSuccess: () => {
+            close();
+        },
+        onError: (error) => {
+            console.log(error);
+        }
+    });
+
     const [selectedCategory, setSelectedCategory] = React.useState<string>("");
     const [todo, dispatch] = React.useReducer(todoReducer, todoInitialState);
     const [activeDate, setActiveDate] = React.useState(false);
@@ -43,7 +63,15 @@ export default function AddTodo({ opened, close }: {opened: boolean, close: () =
             <DefaultForm
                 title="Add new Todo"
                 onSubmit={() => {
-                    console.log("submit");
+                    if(!agent) return;
+                    addTodo.mutate({
+                        agentId: agent.id,
+                        agentType: agentType,
+                        title: todo.title,
+                        description: todo.description,
+                        dueDate: todo.dueDate,
+                        categoryId: todo.categoryId,
+                    });
                 }}
             >
                 <div className="flex w-3/4 flex-col gap-2 p-4">
@@ -66,6 +94,7 @@ export default function AddTodo({ opened, close }: {opened: boolean, close: () =
                     <input
                         className="primary-text-input"
                         type="text"
+                        required
                         placeholder="Do something..."
                         value={todo.title}
                         onChange={(e) =>
@@ -111,7 +140,7 @@ export default function AddTodo({ opened, close }: {opened: boolean, close: () =
                         >
                             Cancel
                         </button>
-                        <button className="primary-button">Save</button>
+                        <button type="submit" className="primary-button" disabled={addTodo.isLoading}>{addTodo.isLoading ? <LoadingIcon/> :  "Save"}</button>
                     </div>
                 </div>
             </DefaultForm>
