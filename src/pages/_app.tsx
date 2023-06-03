@@ -16,7 +16,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
     return (
         <SessionProvider session={session}>
             <MantineProvider withGlobalStyles withNormalizeCSS theme={{ colorScheme: 'dark'}}>
-                <Notifications bg="var(--primary-color)"/>
+                <Notifications />
                 <UserProvider>
                     <Component {...pageProps} />
                 </UserProvider>
