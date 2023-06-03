@@ -34,7 +34,7 @@ const todoInitialState: TodoState = {
 /**
  * the form to add a new todo.
  * */
-export default function AddTodo({ opened, close }: {opened: boolean, close: () => void }) {
+export default function AddTodo({ opened, close, onSave }: {opened: boolean, close: () => void, onSave: () => void }) {
     
     const {agent, agentType} = React.useContext(userContext);
 
@@ -47,6 +47,7 @@ export default function AddTodo({ opened, close }: {opened: boolean, close: () =
     
     const addTodo = api.todos.createTodo.useMutation({
         onSuccess: () => {
+            onSave();
             close();
         },
         onError: (error) => {
@@ -77,7 +78,7 @@ export default function AddTodo({ opened, close }: {opened: boolean, close: () =
                         agentType: agentType,
                         title: todo.title,
                         description: todo.description,
-                        dueDate: todo.dueDate,
+                        dueDate:  activeDate ? todo.dueDate : undefined,
                         categoryId: todo.categoryId,
                     });
                 }}
@@ -115,6 +116,13 @@ export default function AddTodo({ opened, close }: {opened: boolean, close: () =
                         name="desc"
                         cols={30}
                         rows={10}
+                        value={todo.description}
+                        onChange={(e) =>
+                            dispatch({
+                                type: "description",
+                                payload: e.target.value,
+                            })
+                            }
                         className="primary-text-area"
                         placeholder="I have to do something..."
                     ></textarea>
@@ -129,6 +137,9 @@ export default function AddTodo({ opened, close }: {opened: boolean, close: () =
                     </div>
                     <DateTimePicker
                     placeholder="Pick date and time"
+                    classNames={{
+                        input: "primary-text-input",
+                    }}
                     value={todo.dueDate}
                             aria-disabled={!activeDate}
                             disabled={!activeDate}
