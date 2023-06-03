@@ -19,7 +19,7 @@ const agentInitialState: Agent = {
 
 export const userContext = React.createContext<{
     agentType: AgentType;
-    agent: Agent;
+    agent: Agent | null;
     setAgent: (agentType: AgentType, agent: Agent) => void;
 }>({
     agentType: "user",
@@ -33,25 +33,21 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: session } = useSession();
 
     const [agentType, setAgentType] = React.useState<AgentType>("user");
-    const [agent, setAgent] = React.useState<Agent>(agentInitialState);
+    const [agent, setAgent] = React.useState<Agent | null>(null);
 
     React.useEffect(() => {
-        if (session?.user && session.user.id) {
+        if (session?.user && session.user.id && !agent) {
             setAgentType("user");
             setAgent(session.user);
         }
     }, [session]);
     
-    React.useEffect(() => {
-        console.log("agentType", agentType);
-        console.log("agent", agent);
-    }, [agentType, agent]);
-
 
     const setNewAgent = (agentType: AgentType, agent: Agent) => {
         setAgentType(agentType);
         setAgent(agent);
     };
+
     return (
         <userContext.Provider
             value={{
