@@ -21,10 +21,10 @@
 }
 
 .primary-button{
-    @apply bg-[var(--secondary-color)] px-4 py-2 rounded-md text-white w-[8rem];
+    @apply bg-[var(--secondary-color)] px-4 py-2 rounded-md text-white max-w-[8rem] flex justify-center;
 }
 .secondary-button{
-    @apply px-4 py-2 border border-[var(--tertiary-color)] rounded-md text-white w-[8rem];
+    @apply px-4 py-2 border border-[var(--tertiary-color)] rounded-md text-white max-w-[8rem];
 }
 
 .thin-scroll::-webkit-scrollbar {
