@@ -13,6 +13,8 @@ import { validColors } from "~/utils/valid_colors";
 import LoadingIcon from "../misc/loading_icon";
 import { userContext } from "~/contexts/UserProvider";
 import Image from "next/image";
+import { notifications } from "@mantine/notifications";
+import ErrorIcon from "../icons/erro_icon";
 
 type TeamState = Omit<Team, "createdAt" | "updatedAt" | "ownerId" | "id">;
 type TeamAction = keyof TeamState | "reset";
@@ -54,10 +56,23 @@ const AddTeam = ({
     const createTeamMutation = api.teams.createTeam.useMutation({
         onSuccess: () => {
             refetchTeams();
+            notifications.show({
+                title: "Team created",
+                message: "Team created successfully",
+                color: "green",
+                autoClose: 3000,
+            });
             close();
         },
         onError: (error) => {
-            console.log(error);
+          notifications.show({ 
+                title: "Error creating team",
+                message: error.message,
+                color: 'red',
+                autoClose: 3000,
+                icon: <ErrorIcon/>
+                
+            })
         },
     });
 

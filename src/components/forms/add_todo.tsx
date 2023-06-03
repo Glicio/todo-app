@@ -5,6 +5,8 @@ import { DateTimePicker } from "@mantine/dates";
 import ModalContainer from "../containers/modal_container";
 import { userContext } from "~/contexts/UserProvider";
 import LoadingIcon from "../misc/loading_icon";
+import { notifications } from "@mantine/notifications";
+import ErrorIcon from "../icons/erro_icon";
 
 interface TodoState {
     title: string;
@@ -48,7 +50,13 @@ export default function AddTodo({ opened, close }: {opened: boolean, close: () =
             close();
         },
         onError: (error) => {
-            console.log(error);
+            notifications.show({
+                title: "Error adding todo",
+                message: error.message,
+                color: "red",
+                icon: <ErrorIcon />,
+            })
+
         }
     });
 
