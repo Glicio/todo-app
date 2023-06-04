@@ -63,7 +63,15 @@
         max-height: 0;
     }
     100% {
-        max-height: 1000vh;
+        max-height: 100vh;
+    }
+}
+@keyframes close {
+    0% {
+        max-height: 100vh;
+    }
+    100% {
+        max-height: 0;
     }
 }
 .fadeIn {
@@ -78,7 +86,14 @@
 }
 .open {
     animation-name: open;
-    animation-duration: .1s;
+    animation-duration: .3s;
+    animation-fill-mode: forwards;
+    transition: max-height .3s ease-in-out;
+    overflow: hidden;
+}
+.close {
+    animation-name: close;
+    animation-duration: .3s;
     animation-fill-mode: forwards;
     transition: max-height .3s ease-in-out;
     overflow: hidden;
