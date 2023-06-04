@@ -16,7 +16,7 @@ import Image from "next/image";
 import { notifications } from "@mantine/notifications";
 import ErrorIcon from "../icons/erro_icon";
 
-type TeamState = Omit<Team, "createdAt" | "updatedAt" | "ownerId" | "id">;
+type TeamState = Omit<Team, "createdAt" | "updatedAt" | "ownerId" | "id"| "todosCount" | "categoriesCount">;
 type TeamAction = keyof TeamState | "reset";
 
 const teamInitialState: TeamState = {
