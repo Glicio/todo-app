@@ -164,35 +164,33 @@ export const todos = createTRPCRouter({
             }
 
             if (agentType === "user") {
-                const counterSMT = `SELECT COUNT(*) FROM Todo WHERE userId = ?;`;
-                const countUserTodos = await db.execute(counterSMT, [
-                    ctx.session.user.id,
-                ]);
-                if (!countUserTodos || !countUserTodos.rows[0])
-                    throw new TRPCError({
-                        code: "INTERNAL_SERVER_ERROR",
-                        message: "Error while fetching todos",
-                    });
-                const count = getCountFromDBQuery(countUserTodos.rows);
-                if (count >= 50) {
+                const user = await prisma.user.findUnique({
+                    where: {
+                        id: agentId,
+                    },
+                    select: {
+                        todosCreatedCount: true
+                    }
+                })
+                if(!user) throw new TRPCError({code: "NOT_FOUND", message: "User not found"})
+                if (user.todosCreatedCount >= 50) {
                     throw new TRPCError({
                         code: "BAD_REQUEST",
-                        message: "User has too many todos",
+                        message: "You can only create 50 todos",
                     });
                 }
             }
             if (agentType === "team") {
-                const counterSMT = `SELECT COUNT(*) FROM Todo WHERE teamId = ?;`;
-                const countUserTodos = await db.execute(counterSMT, [
-                    input.agentId,
-                ]);
-                if (!countUserTodos || !countUserTodos.rows[0])
-                    throw new TRPCError({
-                        code: "INTERNAL_SERVER_ERROR",
-                        message: "Error while fetching todos",
-                    });
-                const count = getCountFromDBQuery(countUserTodos.rows);
-                if (count >= 50) {
+                const team = await prisma.team.findUnique({
+                    where: {
+                        id: agentId,
+                    },
+                    select: {
+                        todosCount: true
+                    }
+                })
+                if(!team) throw new TRPCError({code: "NOT_FOUND", message: "Team not found"})
+                if (team.todosCount >= 50) {
                     throw new TRPCError({
                         code: "BAD_REQUEST",
                         message: "User has too many todos",
