@@ -6,6 +6,7 @@ import AddIcon from "../icons/add";
 import CategoryLabel from "../misc/category_label";
 import CloseIcon from "../icons/close";
 import { userContext } from "~/contexts/UserProvider";
+import AddBtn from "../input/add_btn";
 
 
 export default function Todos({done}: {done: boolean}) {
@@ -59,12 +60,7 @@ export default function Todos({done}: {done: boolean}) {
                 onSave={() => void todosQuery.refetch()}
             />
             {!showAddTodo && (
-                <button
-                    onClick={() => setShowAddTodo(true)}
-                    className="fixed bottom-20 right-4 z-10 h-12 w-12 rounded-full bg-[var(--secondary-color)] text-gray-300"
-                >
-                    <AddIcon />
-                </button>
+                <AddBtn onClick={() => setShowAddTodo(true)} />
             )}
             <div className="flex flex-col gap-2 p-2 ">
                 {todos?.categories && todos.categories.length > 0 ? (
