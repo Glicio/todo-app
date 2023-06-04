@@ -100,6 +100,10 @@ export default function AddTodo({
                             value={selectedCategory}
                             onChange={(e) => {
                                 setSelectedCategory(e.target.value);
+                                dispatch({
+                                    type: "categoryId",
+                                    payload: e.target.value,
+                                });
                             }}
                             className="primary-select bg-white"
                         >
