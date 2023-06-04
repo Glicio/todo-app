@@ -68,6 +68,15 @@ const AddTeam = ({
             close();
         },
         onError: (error) => {
+        if(error.data?.zodError?.fieldErrors?.name){
+            return notifications.show({
+                title: "Error creating team",
+                message: "Team name is too short",
+                color: 'red',
+                autoClose: 3000,
+                icon: <ErrorIcon/>
+                })
+        }
           notifications.show({ 
                 title: "Error creating team",
                 message: error.message,
