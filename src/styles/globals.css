@@ -8,6 +8,7 @@
     --primary-color: #000;
     --secondary-color: #502FAC;
     --tertiary-color: #4a5568;
+    --gray-300: rgb(209,213,219);
 }
 
 .primary-text-input{
