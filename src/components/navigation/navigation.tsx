@@ -39,7 +39,7 @@ export default function Navigation() {
                     title="Categories"
                     icon={<TagIcon />}
                     onClick={() => {
-                        alert("cat");
+                        void router.push("/categories");
                     }}
                 />
                 <NavButton
