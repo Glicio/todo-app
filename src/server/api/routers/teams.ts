@@ -39,19 +39,22 @@ export const teams = createTRPCRouter({
             color: z.string().regex(/^#[0-9A-F]{6}$/i),
         })).mutation(async ({input, ctx}) => {
         
-            const userTeamsCountSmt = `SELECT count(*) FROM Team WHERE ownerId = ?`;
-            const userTeamsCount = await db.execute(userTeamsCountSmt, [ctx.session.user.id]);
-            if(!userTeamsCount.rows[0]) {
-                throw new TRPCError({
-                    code: 'INTERNAL_SERVER_ERROR',
-                    message: 'Error getting user teams count',
-                });
+            const user = await prisma.user.findUnique({
+                where: {
+                    id: ctx.session.user.id,
+                },
+                select: {
+                    teamsCreatedCount: true,
+                },
+            });
+            if(!user) {
+                throw new TRPCError({code: "INTERNAL_SERVER_ERROR", message: 'User not found'});
             }
-            if (userTeamsCount.rows[0]['count(*)' as keyof typeof userTeamsCount.rows[0]] >= 3) {
+            if (user.teamsCreatedCount >= 3) {
                 throw new TRPCError({code: "BAD_REQUEST", message: 'You can only create 3 teams'});
             }
-
-            const team = await prisma.team.create({
+            
+            const newTeam = prisma.team.create({
                 data: {
                     name: input.name,
                     color: input.color,
@@ -67,8 +70,25 @@ export const teams = createTRPCRouter({
                     }
                 }
             });
+            const userUpdate = prisma.user.update({
+                where: {
+                    id: ctx.session.user.id,
+                },
+                data: {
+                    teamsCreatedCount: {
+                        increment: 1,
+                    }
+                }
+            });
+            try {
+            const [team] = await prisma.$transaction([newTeam, userUpdate]);
             return team;
+            } catch (e) {
+                console.log(e);
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Error while creating team",
+                });
+            }
         }),
-
-
 });

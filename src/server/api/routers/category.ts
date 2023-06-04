@@ -2,8 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { db } from "~/server/db";
-import type { CategoryResponse } from "~/utils/db_responses";
+import { db, prisma } from "~/server/db";
 import checkUserInTeam from "~/utils/check_usr_in_team";
 
 export const category = createTRPCRouter({
@@ -36,6 +35,7 @@ export const category = createTRPCRouter({
             z.object({
                 agentType: z.enum(["user", "team"]),
                 agentId: z.string(),
+                prisma: z.boolean().optional(),
             })
         )
         .query(async ({ ctx, input }) => {
@@ -50,13 +50,14 @@ export const category = createTRPCRouter({
             ) {
                 throw new TRPCError({ code: "UNAUTHORIZED" });
             }
-            const column = agentType === "user" ? "userId" : "teamId";
-            const smt = `SELECT * FROM Category WHERE ${column} = ?;`;
             try {
-                const query = await db.execute(smt, [ctx.session.user.id]);
-                const rows = query.rows as CategoryResponse[];
-                if (!query || !rows[0]) return [];
-                return rows;
+                const categories = await prisma.category.findMany({
+                    where: {
+                        [input.agentType === "user" ? "userId" : "teamId"]:
+                            agentId,
+                    },
+                });
+                return categories;
             } catch (e) {
                 console.log(e);
                 throw new TRPCError({

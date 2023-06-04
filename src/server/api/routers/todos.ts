@@ -4,7 +4,6 @@ import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { db, prisma } from "~/server/db";
 import type { CategoryResponse, TodoResponse } from "~/utils/db_responses";
-import getCountFromDBQuery from "~/utils/getCountFromDBQuery";
 import checkUserInTeam from "~/utils/check_usr_in_team";
 
 export const todos = createTRPCRouter({
@@ -166,7 +165,7 @@ export const todos = createTRPCRouter({
             if (agentType === "user") {
                 const user = await prisma.user.findUnique({
                     where: {
-                        id: agentId,
+                        id: ctx.session.user.id,
                     },
                     select: {
                         todosCreatedCount: true
@@ -199,7 +198,7 @@ export const todos = createTRPCRouter({
             }
 
             try {
-                const todo = await prisma.todo.create({
+                const newTodo = prisma.todo.create({
                     data: {
                         title: title,
                         dueDate: dueDate,
@@ -225,6 +224,26 @@ export const todos = createTRPCRouter({
                             : undefined,
                     },
                 });
+                const agent = (agentType === "user") ? prisma.user.update({
+                    where: {
+                        id: ctx.session.user.id
+                    },
+                    data: {
+                        todosCreatedCount: {
+                            increment: 1
+                        }
+                    }
+                }) : prisma.team.update({
+                    where: {
+                        id: agentId
+                    },
+                    data: {
+                        todosCount: {
+                            increment: 1
+                        }
+                    }
+                })
+                const [todo] = await prisma.$transaction([newTodo, agent])
                 return todo;
             } catch (e) {
                 console.log(e);
@@ -256,10 +275,27 @@ export const todos = createTRPCRouter({
                 }
             }
             try {
-                const todo = await prisma.todo.delete({
+                const todoToDelete = prisma.todo.delete({
                     where: { id: input.id }
                 });
-                return todo;
+                const user = (input.agentType === "user") ? prisma.user.update({
+                    where: { id: ctx.session.user.id },
+                    data: {
+                        todosCreatedCount: {
+                            decrement: 1
+                        }
+                    }
+                }) : 
+                prisma.team.update({
+                    where: { id: input.agentId },
+                    data: {
+                        todosCount: {
+                            decrement: 1
+                        }
+                    }
+                })
+
+                await prisma.$transaction([todoToDelete, user])
             } catch (e) {
                 console.log(e);
                 throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Error while deleting todo" });
