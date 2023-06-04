@@ -14,7 +14,7 @@ export default function CategoryLabel({
             onClick={() => {
                 if (onClick) onClick(category.id);
             }}
-            className={`flex items-center gap-2 rounded-md pl-1 pr-2`}
+            className={`flex items-center gap-2 rounded-md pl-1 pr-2 whitespace-nowrap`}
 
             style={{
                 border: "1px solid " + category.color,
