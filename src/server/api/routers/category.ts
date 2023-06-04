@@ -101,8 +101,12 @@ export const category = createTRPCRouter({
                                 id: ctx.session.user.id,
                             },
                         },
-                        [input.agentType === "user" ? "userId" : "teamId"]:
-                            agentId,
+                        [input.agentType === "user" ? "user" : "team"]:
+                            {
+                            connect: {
+                                id: agentId,
+                            }
+                        },
                     },
                 });
                 const agent = agentType === "user" ? prisma.user.update({

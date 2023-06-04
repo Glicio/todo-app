@@ -5,6 +5,7 @@ import CategoryComponent from './category_component';
 import AddBtn from '../input/add_btn';
 import AddCategory from '../forms/add_category';
 import { useDisclosure } from '@mantine/hooks';
+import { Category } from '@prisma/client';
 
 
 
@@ -24,11 +25,24 @@ export default function Categories() {
         }
     );
 
+    const [categories, setCategories] = React.useState<Category[]>([]);
+    
+    React.useEffect(() => {
+        if (categoriesMutation.data) {
+            setCategories(categoriesMutation.data);
+        }
+    }, [categoriesMutation.data]);
+
+
     return (
         <div>
-            <AddCategory opened={addCategory} onClose={closeAddCategory}/>
+            <AddCategory opened={addCategory} onClose={closeAddCategory} onAdd={(category) => {
+                setCategories((prev) => [...prev, category]);
+            }}/>
             <AddBtn onClick={openAddCategory}/> 
-            <CategoryComponent/>
+            {categories.map((category) => (
+                <CategoryComponent key={category.id} category={category}/>
+            ))}
         </div>
     )
 }
