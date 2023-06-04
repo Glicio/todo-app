@@ -57,7 +57,14 @@
         opacity: 0;
     }
 }
-
+@keyframes open {
+    0% {
+        max-height: 0;
+    }
+    100% {
+        max-height: 1000vh;
+    }
+}
 .fadeIn {
     animation-name: fadeIn;
     animation-duration: 0.1s;
@@ -68,4 +75,13 @@
     animation-duration: 0.1s;
     animation-fill-mode: forwards;
 }
+.open {
+    animation-name: open;
+    animation-duration: .1s;
+    animation-fill-mode: forwards;
+    transition: max-height .3s ease-in-out;
+    overflow: hidden;
+}
+
+
 
