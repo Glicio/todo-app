@@ -4,9 +4,11 @@ import DefaultForm from "./default_form";
 import { DateTimePicker } from "@mantine/dates";
 import ModalContainer from "../containers/modal_container";
 import { userContext } from "~/contexts/UserProvider";
-import LoadingIcon from "../misc/loading_icon";
 import { notifications } from "@mantine/notifications";
 import ErrorIcon from "../icons/erro_icon";
+import TextInput from "../input/text_input";
+import FormItem from "../input/form_item";
+import FormActions from "../input/form_actions";
 
 interface TodoState {
     title: string;
@@ -34,17 +36,27 @@ const todoInitialState: TodoState = {
 /**
  * the form to add a new todo.
  * */
-export default function AddTodo({ opened, close, onSave }: {opened: boolean, close: () => void, onSave: () => void }) {
-    
-    const {agent, agentType} = React.useContext(userContext);
+export default function AddTodo({
+    opened,
+    close,
+    onSave,
+}: {
+    opened: boolean;
+    close: () => void;
+    onSave: () => void;
+}) {
+    const { agent, agentType } = React.useContext(userContext);
 
-    const categoriesQuery = api.category.getAgentCategories.useQuery({
-        agentId: agent?.id || "",
-        agentType: agentType,
-    }, {
-        enabled: !!agent && !!agentType,
-    });
-    
+    const categoriesQuery = api.category.getAgentCategories.useQuery(
+        {
+            agentId: agent?.id || "",
+            agentType: agentType,
+        },
+        {
+            enabled: !!agent && !!agentType,
+        }
+    );
+
     const addTodo = api.todos.createTodo.useMutation({
         onSuccess: () => {
             onSave();
@@ -56,9 +68,8 @@ export default function AddTodo({ opened, close, onSave }: {opened: boolean, clo
                 message: error.message,
                 color: "red",
                 icon: <ErrorIcon />,
-            })
-
-        }
+            });
+        },
     });
 
     const [selectedCategory, setSelectedCategory] = React.useState<string>("");
@@ -68,99 +79,96 @@ export default function AddTodo({ opened, close, onSave }: {opened: boolean, clo
         console.log(todo);
     }, [todo]);
     return (
-            <ModalContainer opened={opened} onClose={close}>
+        <ModalContainer opened={opened} onClose={close}>
             <DefaultForm
                 title="Add new Todo"
                 onSubmit={() => {
-                    if(!agent) return;
+                    if (!agent) return;
                     addTodo.mutate({
                         agentId: agent.id,
                         agentType: agentType,
                         title: todo.title,
                         description: todo.description,
-                        dueDate:  activeDate ? todo.dueDate : undefined,
+                        dueDate: activeDate ? todo.dueDate : undefined,
                         categoryId: todo.categoryId,
                     });
                 }}
             >
                 <div className="flex w-3/4 flex-col gap-2 p-4">
-                    <label htmlFor="category">Category</label>
-                    <select
-                        value={selectedCategory}
-                        onChange={(e) => {
-                            setSelectedCategory(e.target.value);
-                        }}
-                        className="primary-select bg-white"
-                    >
-                        <option value="">No category</option>
-                        {categoriesQuery.data?.map((category) => (
-                            <option key={category.id} value={category.id}>
-                                {category.name}
-                            </option>
-                        ))}
-                    </select>
-                    <label htmlFor="title">Title</label>
-                    <input
-                        className="primary-text-input"
-                        type="text"
-                        required
-                        placeholder="Do something..."
+                    <FormItem label="Category">
+                        <select
+                            value={selectedCategory}
+                            onChange={(e) => {
+                                setSelectedCategory(e.target.value);
+                            }}
+                            className="primary-select bg-white"
+                        >
+                            <option value="">No category</option>
+                            {categoriesQuery.data?.map((category) => (
+                                <option key={category.id} value={category.id}>
+                                    {category.name}
+                                </option>
+                            ))}
+                        </select>
+                    </FormItem>
+                    <TextInput
+                        label="Title"
                         value={todo.title}
-                        onChange={(e) =>
-                            dispatch({ type: "title", payload: e.target.value })
+                        required
+                        onChange={(value) =>
+                            dispatch({ type: "title", payload: value })
                         }
+                        placeholder="The title of your todo"
                     />
-                    <label htmlFor="desc">Description</label>
-                    <textarea
-                        id="desc"
-                        name="desc"
-                        cols={30}
-                        rows={10}
-                        value={todo.description}
-                        onChange={(e) =>
-                            dispatch({
-                                type: "description",
-                                payload: e.target.value,
-                            })
+                    <FormItem label="Description">
+                        <textarea
+                            id="desc"
+                            name="desc"
+                            cols={30}
+                            rows={10}
+                            value={todo.description}
+                            onChange={(e) =>
+                                dispatch({
+                                    type: "description",
+                                    payload: e.target.value,
+                                })
                             }
-                        className="primary-text-area"
-                        placeholder="I have to do something..."
-                    ></textarea>
-                    
-                    <div className="flex gap-2">
-                    <label htmlFor="duedate">Due date</label>
-                        <input type="checkbox"
-                            checked={activeDate}
-                            onChange={() => setActiveDate((old) => !old)}
-                            className="rounded-md"
-                        />
-                    </div>
-                    <DateTimePicker
-                    placeholder="Pick date and time"
-                    classNames={{
-                        input: "primary-text-input",
-                    }}
-                    value={todo.dueDate}
+                            className="primary-text-area"
+                            placeholder="Describe your todo"
+                        ></textarea>
+                    </FormItem>
+
+                    <FormItem>
+                        <div className="flex items-center gap-1">
+                            <label htmlFor="duedate" className="text-sm font-bold">
+                                Due date
+                            </label>
+                            <input
+                                type="checkbox"
+                                checked={activeDate}
+                                onChange={() => setActiveDate((old) => !old)}
+                                className="rounded-md"
+                            />
+                        </div>
+                        <DateTimePicker
+                            placeholder="Pick date and time"
+                            classNames={{
+                                input: "primary-text-input",
+                            }}
+                            value={todo.dueDate}
                             aria-disabled={!activeDate}
                             disabled={!activeDate}
-                            className="bg-white rounded-md"
-                                onChange={(value) =>{
-                                    if(!value) return
-                                        dispatch({ type: "dueDate", payload: new Date(value?.toISOString()) })
-                                }
-                                }
-                            />
-
-                    <div className="items-centert mx-auto mt-4 w-full flex justify-center gap-2 ">
-                        <button
-                            type="button"
-                            className="secondary-button w-1/2"
-                            onClick={close}
-                        >
-                            Cancel
-                        </button>
-                        <button type="submit" className="primary-button w-1/2" disabled={addTodo.isLoading}>{addTodo.isLoading ? <LoadingIcon/> :  "Save"}</button>
-                    </div>
+                            className="rounded-md bg-white"
+                            onChange={(value) => {
+                                if (!value) return;
+                                dispatch({
+                                    type: "dueDate",
+                                    payload: new Date(value?.toISOString()),
+                                });
+                            }}
+                        />
+                    </FormItem>
+                        <FormActions loading={addTodo.isLoading} onCancel={close}/>
                 </div>
             </DefaultForm>
         </ModalContainer>

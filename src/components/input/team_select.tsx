@@ -15,6 +15,9 @@ import { userContext } from "~/contexts/UserProvider";
 import Image from "next/image";
 import { notifications } from "@mantine/notifications";
 import ErrorIcon from "../icons/erro_icon";
+import SelectColor from "./select_color";
+import TextInput from "./text_input";
+import FormActions from "./form_actions";
 
 type TeamState = Omit<Team, "createdAt" | "updatedAt" | "ownerId" | "id"| "todosCount" | "categoriesCount">;
 type TeamAction = keyof TeamState | "reset";
@@ -105,63 +108,10 @@ const AddTeam = ({
                 }}
             >
                 <div className="flex flex-grow flex-col justify-center gap-2">
-                    <label htmlFor="name">Team name</label>
-                    <input
-                        type="text"
-                        name="name"
-                        id="name"
-                        required
-                        placeholder="The new team name"
-                        className="primary-text-input"
-                        value={teamState.name}
-                        onChange={(e) =>
-                            dispatch({ type: "name", payload: e.target.value })
-                        }
-                    />
-                    <label htmlFor="color">Team color</label>
-                    <button
-                        type="button"
-                        className="flex h-8 w-full items-center justify-center border border-[var(--tertiary-color)]"
-                        onClick={() => {
-                            dispatch({ type: "color", payload: "" });
-                        }}
-                        style={{
-                            backgroundColor: teamState.color || "",
-                        }}
-                    >
-                        {teamState.color ? "" : <span>No color</span>}
-                    </button>
-                    <ColorPicker
-                        value={teamState.color || ""}
-                        withPicker={false}
-                        swatches={validColors}
-                        onChange={(color) => {
-                            dispatch({ type: "color", payload: color });
-                        }}
-                    />
-                    <div className="flex gap-2 w-full">
-                        <button
-                            type="button"
-                            className="secondary-button w-1/2"
-                            onClick={close}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="primary-button w-1/2"
-                            disabled={createTeamMutation.isLoading}
-                        >
-                            <div className="flex justify-center">
-                                {createTeamMutation.isLoading ? (
-                                    <LoadingIcon />
-                                ) : (
-                                    "Save"
-                                )}
-                            </div>
-                        </button>
-                    </div>
-                </div>
+                    <TextInput label="Team name" value={teamState.name} required onChange={(value) => dispatch({ type: "name", payload: value })} placeholder="Your new team's name" />
+                    <SelectColor color={teamState.color} setColor={(color) => dispatch({ type: "color", payload: color })} />
+                    <FormActions onCancel={close} loading={createTeamMutation.isLoading}/>
+               </div>
             </DefaultForm>
         </ModalContainer>
     );
