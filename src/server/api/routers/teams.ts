@@ -35,7 +35,7 @@ export const teams = createTRPCRouter({
     * */
     createTeam: protectedProcedure.input(
         z.object({
-            name: z.string(),
+            name: z.string().min(3).max(20),
             color: z.string().regex(/^#[0-9A-F]{6}$/i),
         })).mutation(async ({input, ctx}) => {
         
