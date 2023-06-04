@@ -15,7 +15,6 @@ export default async function checkUserInTeam({ teamId, userId }: { teamId: stri
 //           },
 //       },
 //   });
-    console.log("relation count", count)
     if (count !== 1) return false
     return true
 }
