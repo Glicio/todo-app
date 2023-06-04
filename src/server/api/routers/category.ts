@@ -74,6 +74,7 @@ export const category = createTRPCRouter({
             z.object({
                 name: z.string(),
                 color: z.string().regex(/^#[0-9A-F]{6}$/i),
+                description: z.string().optional(),
                 agentType: z.enum(["user", "team"]),
                 agentId: z.string(),
             })
@@ -94,6 +95,7 @@ export const category = createTRPCRouter({
                     data: {
                         name: input.name,
                         color: input.color,
+                        description: input.description,
                         createdBy: {
                             connect: {
                                 id: ctx.session.user.id,
