@@ -44,7 +44,7 @@ export const todos = createTRPCRouter({
             z.object({
                 agentType: z.enum(["user", "team"]),
                 agentId: z.string(),
-                excludeDone: z.boolean().optional(),
+                done: z.boolean().optional(),
             })
         )
         .query(async ({ ctx, input }) => {
@@ -76,8 +76,7 @@ export const todos = createTRPCRouter({
 
             const column = agentType === "user" ? "userId" : "teamId";
 
-            const todoSmt = `SELECT * FROM Todo WHERE ${column} = ? ${input.excludeDone ? "AND Todo.done = 1" : ""
-                };`;
+            const todoSmt = `SELECT * FROM Todo WHERE ${column} = ? AND Todo.done = ${input.done ? "1" :"0"};`;
             const categorySmt = `SELECT * FROM Category WHERE ${column} = ?;`;
 
             try {
