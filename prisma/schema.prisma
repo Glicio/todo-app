@@ -138,7 +138,7 @@ model User {
     //counters
     todosCreatedCount    Int       @default(0)
     teamsCreatedCount    Int       @default(0)
-    categoriesCretedCount Int     @default(0)
+    categoriesCreatedCount Int     @default(0)
 
 
     //relationships
