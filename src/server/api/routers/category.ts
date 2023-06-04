@@ -72,7 +72,7 @@ export const category = createTRPCRouter({
     createCategory: protectedProcedure
         .input(
             z.object({
-                name: z.string(),
+                name: z.string().min(3).max(50),
                 color: z.string().regex(/^#[0-9A-F]{6}$/i),
                 description: z.string().optional(),
                 agentType: z.enum(["user", "team"]),
