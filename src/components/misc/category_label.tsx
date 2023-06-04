@@ -14,7 +14,7 @@ export default function CategoryLabel({
             onClick={() => {
                 if (onClick) onClick(category.id);
             }}
-            className={`flex items-center gap-2 rounded-md pl-1 pr-2 whitespace-nowrap`}
+            className={`flex items-center gap-2 rounded-md pl-1 pr-2 whitespace-nowrap `}
 
             style={{
                 border: "1px solid " + category.color,
@@ -25,7 +25,7 @@ export default function CategoryLabel({
                 className="h-2 w-2 rounded-full border border-[var(--tertiary-color)]"
                 style={{ backgroundColor: category.color }}
             ></div>
-            <span>{category.name}</span>
+            <span className="mix-blend-difference">{category.name}</span>
         </button>
     );
 }

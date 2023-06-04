@@ -11,6 +11,9 @@ import ModalContainer from "../containers/modal_container";
 import { useDisclosure } from "@mantine/hooks";
 import LoadingIcon from "../misc/loading_icon";
 
+
+
+const disabled_color = "rgb(209,213,219)"
 /**
  * The main todo component.
  * */
@@ -144,22 +147,24 @@ export default function Todo({
                 style={{
                     borderColor: todo.category.color
                         ? todo.category.color
-                        : "gray",
+                        : disabled_color,
                     backgroundColor: todoActive
                         ? todo.category.color
                             ? todo.category.color
-                            : "gray"
+                            : disabled_color
                         : "",
                 }}
             >
-                {todo.title}
+                <span className="mix-blend-difference font-medium bg-">
+                    {todo.title}
+                </span>
             </button>
             <div
                 className="todo-body overflow-hidden transition-all ease-in-out"
                 style={{
                     borderColor: todo.category.color
                         ? todo.category.color
-                        : "grey",
+                        : disabled_color,
                     maxHeight: todoActive ? "1000px" : "0px",
                 }}
             >
@@ -169,7 +174,7 @@ export default function Todo({
                         style={{
                             borderColor: todo.category.color
                                 ? todo.category.color
-                                : "gray",
+                                : disabled_color,
                         }}
                     >
                         {todo.dueDate ? (
@@ -187,7 +192,7 @@ export default function Todo({
                     style={{
                         borderColor: todo.category.color
                             ? todo.category.color
-                            : "gray",
+                            : disabled_color,
                     }}
                 >
                     <button
