@@ -192,7 +192,7 @@ export const todos = createTRPCRouter({
                 if (team.todosCount >= 50) {
                     throw new TRPCError({
                         code: "BAD_REQUEST",
-                        message: "User has too many todos",
+                        message: "This team can only create 50 todos",
                     });
                 }
             }
