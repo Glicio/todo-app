@@ -32,6 +32,10 @@ model Account {
 model Team {
     id        String   @id @default(cuid())
     name      String
+    //counters
+    todosCount Int      @default(0)
+    categoriesCount Int @default(0)
+    //timestamps
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     image  String?
@@ -103,14 +107,23 @@ model Category {
     name        String
     description String?
     color       String?
-
+    //timestamps
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime? @updatedAt
     //relationships
+    createdBy   User     @relation("categoriesCreated",fields: [createdById], references: [id], onDelete: Cascade)
+    createdById String
+    updatedBy   User?    @relation("categoriesUpdated",fields: [updatedById], references: [id], onDelete: Cascade)
+    updatedById String?
     team        Team?     @relation(fields: [teamId], references: [id], onDelete: Cascade)
     teamId      String?
     user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
     userId      String?
     todos       Todo[]
 
+    //indexes
+    @@index([updatedById])
+    @@index([createdById])
     @@index([teamId])
     @@index([userId])
 }
@@ -122,6 +135,11 @@ model User {
     email         String?   @unique
     emailVerified DateTime?
     image         String?
+    //counters
+    todosCreatedCount    Int       @default(0)
+    teamsCreatedCount    Int       @default(0)
+    categoriesCretedCount Int     @default(0)
+
 
     //relationships
     teams         Team[]
@@ -130,13 +148,16 @@ model User {
     accounts      Account[]
     sessions      Session[]
 
+    categoriesCreated Category[] @relation("categoriesCreated")
+    categoriesUpdated Category[] @relation("categoriesUpdated")
+    categories    Category[]
+
     todos         Todo[]
     todosDone     Todo[]    @relation("todoDoneBy")
     todosCreated  Todo[]    @relation("todoCreatedBy")
     todosUpdated  Todo[]    @relation("todoUpdatedBy")
     todosAssigned Todo[]    @relation("todosAssigned")
 
-    categories    Category[]
 }
 
 model VerificationToken {
