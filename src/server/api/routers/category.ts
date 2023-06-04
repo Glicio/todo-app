@@ -66,4 +66,72 @@ export const category = createTRPCRouter({
                 });
             }
         }),
+    /**
+    * creates a category for the current agent
+    * */
+    createCategory: protectedProcedure
+        .input(
+            z.object({
+                name: z.string(),
+                color: z.string().regex(/^#[0-9A-F]{6}$/i),
+                agentType: z.enum(["user", "team"]),
+                agentId: z.string(),
+            })
+        )
+        .mutation(async ({ input, ctx }) => {
+            const { agentType, agentId } = input;
+            if (
+                agentType === "team" &&
+                !(await checkUserInTeam({
+                    teamId: agentId,
+                    userId: ctx.session.user.id,
+                }))
+            ) {
+                throw new TRPCError({ code: "UNAUTHORIZED" });
+            }
+            try {
+                const newCategory = prisma.category.create({
+                    data: {
+                        name: input.name,
+                        color: input.color,
+                        createdBy: {
+                            connect: {
+                                id: ctx.session.user.id,
+                            },
+                        },
+                        [input.agentType === "user" ? "userId" : "teamId"]:
+                            agentId,
+                    },
+                });
+                const agent = agentType === "user" ? prisma.user.update({
+                    where: {
+                        id: agentId,
+                    },
+                    data: {
+                        categoriesCretedCount: {
+                            increment: 1,
+                        },
+                    },
+                }) : prisma.team.update({
+                    where: {
+                        id: agentId,
+                    },
+                    data: {
+                        categoriesCount: {
+                            increment: 1,
+                        },
+                    },
+                });
+               const [category] = await prisma.$transaction([newCategory, agent]);
+                return category;
+            } catch (e) {
+                console.log(e);
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Error while creating category",
+                });
+            }
+        }
+        ),
+
 });
