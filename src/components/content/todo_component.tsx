@@ -86,6 +86,23 @@ export default function Todo({
         }
 
     })
+    const undoMutation = api.todos.undoTodo.useMutation({
+        onError: (error) => {
+            notifications.show({
+                color: "red",
+                title: "Todo not updated",
+                message: error.message,
+                autoClose: 1000,
+            });
+        },
+        onSuccess: () => {
+            setFade(true);
+            setTimeout(() => {
+                onDone(todo.id as string);
+            }, 100);
+        }
+    })
+
     return (
         <div key={todo.id} className={`flex flex-col ${fade ? "fadeOut" : ""}`}>
             <ModalContainer opened={confirmDelete} onClose={closeConfirmDelete}>
@@ -181,15 +198,23 @@ export default function Todo({
                     >
                         <Trash /> Delete
                     </button>
-                    <button className="flex items-center gap-2 text-yellow-400">
+                    {todo.done ? null : <button className="flex items-center gap-2 text-yellow-400">
                         <Edit /> Edit
-                    </button>
+                    </button>}
                     {todo.done ? (
-                        <button className="flex items-center gap-2">
+                        <button className="flex items-center gap-2" onClick={() => {
+                            if(!agent || !agentType || !todo.id) return;
+
+                            undoMutation.mutate({
+                                todoId: todo.id,
+                                agentId: agent.id,
+                                agentType: agentType
+                            })
+                        }}>
                             <Undo /> Undo
                         </button>
                     ) : (
-                        <button className="flex items-center gap-2 text-green-400" 
+                        <button className="flex items-center gap-2 text-green-400 " 
                         disabled={doMutation.isLoading}
                         onClick={() => {
                             if (!agent || !agentType || !todo.id) return;
@@ -200,7 +225,7 @@ export default function Todo({
                             })
                         }
                         }>
-                            {doMutation.isLoading ? <LoadingIcon/> : <Check />} Done
+                            {doMutation.isLoading ? <LoadingIcon color="rgb(74,222,128)"/> : <Check />} Done
                         </button>
                     )}
                 </div>

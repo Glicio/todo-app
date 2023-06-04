@@ -6,16 +6,16 @@ import AddIcon from "../icons/add";
 import CategoryLabel from "../misc/category_label";
 import CloseIcon from "../icons/close";
 import { userContext } from "~/contexts/UserProvider";
-import { type Todo as DBTodo } from "@prisma/client";
 
 
-export default function Todos() {
+export default function Todos({done}: {done: boolean}) {
     const { agent, agentType } = React.useContext(userContext);
 
     const todosQuery = api.todos.getUserTodos.useQuery(
-        { excludeDone: false, agentId: agent?.id || "", agentType: agentType },
+        { done: done, agentId: agent?.id || "", agentType: agentType },
         {
             enabled: !!agent && !!agentType,
+            refetchOnMount: true,
         }
     );
 
