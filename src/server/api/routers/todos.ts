@@ -67,7 +67,7 @@ export const todos = createTRPCRouter({
                 const todosQuery = prisma.todo.findMany({
                     where: {
                         [agentType === "team" ? "teamId" : "userId"]:  agentId,
-                        done: input.done ? input.done : undefined,
+                        done: input.done,
                     },
                     include: {
                         createdBy: {
