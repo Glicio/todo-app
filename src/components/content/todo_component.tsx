@@ -10,6 +10,8 @@ import { type Todo } from "@prisma/client";
 import ModalContainer from "../containers/modal_container";
 import { useDisclosure } from "@mantine/hooks";
 import LoadingIcon from "../misc/loading_icon";
+import type SimpleCategory from "~/utils/simple_category";
+import SimpleTodo from "~/utils/simple_todo";
 
 
 
@@ -17,26 +19,13 @@ const disabled_color = "rgb(209,213,219)"
 /**
  * The main todo component.
  * */
-export default function Todo({
+export default function TodoComponent({
     todo,
     onDelete,
     onEdit,
     onDone,
 }: {
-    todo: {
-        category: {
-            name: string | undefined;
-            id: string | undefined;
-            color?: string | undefined;
-        };
-        id: string | undefined;
-        title: string | undefined;
-        description: string | undefined;
-        createdAt: string | undefined;
-        done: string | undefined;
-        dueDate: string | undefined;
-        updatedAt: string | undefined;
-    };
+    todo: SimpleTodo;
     onDelete: (id: string) => void;
     onEdit: (todo: Todo) => void;
     onDone: (id: string) => void;
@@ -59,7 +48,7 @@ export default function Todo({
             });
             setFade(true);
             setTimeout(() => {
-                onDelete(todo.id as string);
+                onDelete(todo.id);
             }, 100);
         },
         onError: (error) => {
@@ -84,7 +73,7 @@ export default function Todo({
         onSuccess: () => {
             setFade(true);
             setTimeout(() => {
-                onDone(todo.id as string);
+                onDone(todo.id);
             }, 100);
         }
 
@@ -101,7 +90,7 @@ export default function Todo({
         onSuccess: () => {
             setFade(true);
             setTimeout(() => {
-                onDone(todo.id as string);
+                onDone(todo.id);
             }, 100);
         }
     })
@@ -145,11 +134,11 @@ export default function Todo({
                     }`}
                 onClick={() => setTodoActive((old) => !old)}
                 style={{
-                    borderColor: todo.category.color
+                    borderColor: todo.category?.color
                         ? todo.category.color
                         : disabled_color,
                     backgroundColor: todoActive
-                        ? todo.category.color
+                        ? todo.category?.color
                             ? todo.category.color
                             : disabled_color
                         : "",
@@ -162,7 +151,7 @@ export default function Todo({
             <div
                 className="todo-body overflow-hidden transition-all ease-in-out"
                 style={{
-                    borderColor: todo.category.color
+                    borderColor: todo.category?.color
                         ? todo.category.color
                         : disabled_color,
                     maxHeight: todoActive ? "1000px" : "0px",
@@ -172,7 +161,7 @@ export default function Todo({
                     <div
                         className="border-x border-t p-2"
                         style={{
-                            borderColor: todo.category.color
+                            borderColor: todo.category?.color
                                 ? todo.category.color
                                 : disabled_color,
                         }}
@@ -190,7 +179,7 @@ export default function Todo({
                 <div
                     className="flex w-full items-center justify-center gap-8 rounded-b-md border border-x p-2"
                     style={{
-                        borderColor: todo.category.color
+                        borderColor: todo.category?.color
                             ? todo.category.color
                             : disabled_color,
                     }}

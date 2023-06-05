@@ -9,6 +9,7 @@ import ErrorIcon from "../icons/erro_icon";
 import TextInput from "../input/text_input";
 import FormItem from "../input/form_item";
 import FormActions from "../input/form_actions";
+import SimpleTodo from "~/utils/simple_todo";
 
 interface TodoState {
     title: string;
@@ -39,11 +40,11 @@ const todoInitialState: TodoState = {
 export default function AddTodo({
     opened,
     close,
-    onSave,
+    onAdd,
 }: {
     opened: boolean;
     close: () => void;
-    onSave: () => void;
+    onAdd?: (todo: SimpleTodo) => void;
 }) {
     const { agent, agentType } = React.useContext(userContext);
 
@@ -58,8 +59,10 @@ export default function AddTodo({
     );
 
     const addTodo = api.todos.createTodo.useMutation({
-        onSuccess: () => {
-            onSave();
+        onSuccess: (data) => {
+            if (onAdd) {
+                onAdd(data);
+            }
             close();
         },
         onError: (error) => {
@@ -71,6 +74,12 @@ export default function AddTodo({
             });
         },
     });
+
+    const editTodo = api.todos.updateTodo.useMutation({
+        onSuccess: (data) => {
+        console.log(data)
+        }
+    })
 
     const [selectedCategory, setSelectedCategory] = React.useState<string>("");
     const [todo, dispatch] = React.useReducer(todoReducer, todoInitialState);

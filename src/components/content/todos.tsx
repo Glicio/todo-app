@@ -1,11 +1,14 @@
 import React from "react";
 import { api } from "~/utils/api";
-import Todo from "./todo_component";
 import AddTodo from "../forms/add_todo";
 import CategoryLabel from "../misc/category_label";
 import CloseIcon from "../icons/close";
 import { userContext } from "~/contexts/UserProvider";
 import AddBtn from "../input/add_btn";
+import type SimpleTodo from "~/utils/simple_todo";
+import type SimpleCategory from "~/utils/simple_category";
+import TodoComponent from "./todo_component";
+
 
 
 export default function Todos({done}: {done: boolean}) {
@@ -19,18 +22,16 @@ export default function Todos({done}: {done: boolean}) {
         }
     );
 
-    const [todos, setTodos] = React.useState<
-        typeof todosQuery.data | undefined
-    >();
+    const [todos, setTodos] = React.useState<SimpleTodo[]>([]);
     const [showAddTodo, setShowAddTodo] = React.useState(false);
-    const [selectedCategory, setSelectedCategory] = React.useState<string[]>(
-        []
-    );
+    const [selectedCategory, setSelectedCategory] = React.useState<string[]>([]);
+    const [categories, setCategories] = React.useState<SimpleCategory[]>([]);
 
     React.useEffect(() => {
         if (todosQuery.data) {
-            setTodos(todosQuery.data);
-        }
+            setTodos(todosQuery.data.todos); 
+            setCategories(todosQuery.data.categories);
+          }
     }, [todosQuery.data]);
 
     if (todosQuery.isLoading)
@@ -42,12 +43,12 @@ export default function Todos({done}: {done: boolean}) {
 
     const removeTodo = (id: string) => {
         setTodos((old) => {
-            if (!old) return undefined;
-            return {
-                ...old,
-                todos: old.todos.filter((t) => t.id !== id),
-            };
+            return old.filter((todo) => todo.id !== id);
         });
+    };
+    
+    const addTodo = (todo: SimpleTodo) => {
+        setTodos((old) => [...old, todo]);
     };
 
 
@@ -57,12 +58,13 @@ export default function Todos({done}: {done: boolean}) {
                 close={() => setShowAddTodo(false)}
                 opened={showAddTodo}
                 onSave={() => void todosQuery.refetch()}
+                onAdd={(todo) => addTodo(todo)}
             />
             {!showAddTodo && (
                 <AddBtn onClick={() => setShowAddTodo(true)} />
             )}
             <div className="flex flex-col gap-2 p-2 ">
-                {todos?.categories && todos.categories.length > 0 ? (
+                {categories && categories.length > 0 ? (
                     <>
                         <div>
                             <div className="flex items-center gap-1">
@@ -80,8 +82,8 @@ export default function Todos({done}: {done: boolean}) {
                             </div>
 
                             <div className="thin-scroll flex gap-2 overflow-auto pb-2 pt-1">
-                                {todos?.categories &&
-                                    todos.categories.map((category) => (
+                                {categories &&
+                                    categories.map((category) => (
                                         <CategoryLabel
                                             active={selectedCategory.includes(
                                                 category.id
@@ -113,14 +115,14 @@ export default function Todos({done}: {done: boolean}) {
                         <div className="my-2 border-b border-[var(--tertiary-color)]"></div>{" "}
                     </>
                 ) : null}
-                {todos?.todos &&
-                    todos.todos
+                {todos &&
+                    todos
                         .filter((todo) => {
-                            if (selectedCategory.length === 0) return true;
+                            if (selectedCategory.length === 0 || !todo.categoryId) return true;
                             return selectedCategory.includes(todo.categoryId);
                         })
                         .map((todo) => (
-                            <Todo
+                            <TodoComponent
                                 key={todo.id}
                                 todo={todo}
                                 onDelete={(id) => {
