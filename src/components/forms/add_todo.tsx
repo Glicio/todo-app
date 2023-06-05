@@ -76,9 +76,6 @@ export default function AddTodo({
     const [selectedCategory, setSelectedCategory] = React.useState<string>("");
     const [todo, dispatch] = React.useReducer(todoReducer, todoInitialState);
     const [activeDate, setActiveDate] = React.useState(false);
-    React.useEffect(() => {
-        console.log(todo);
-    }, [todo]);
     return (
         <ModalContainer opened={opened} onClose={close}>
             <DefaultForm
