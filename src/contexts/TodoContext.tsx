@@ -32,15 +32,9 @@ export const TodoProvider = ({children}:{
     
     const todosQuery = api.todos.getUserTodos.useQuery({agentId: agent?.id as string, agentType}, {
         enabled: !!agent?.id && !!agentType,
-        refetchOnReconnect: false,
+        refetchOnWindowFocus: false,
     })
     
-
-    React.useEffect(() => {
-
-    console.log("TODO CONTEXT")
-
-    }, [])
 
     React.useEffect(() => {
         if(todosQuery.data){

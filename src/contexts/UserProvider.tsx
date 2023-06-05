@@ -52,6 +52,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     
     const teamsQuery = api.teams.getUserTeams.useQuery(undefined, {
         enabled: !!agent?.id && !!agentType,
+        refetchOnWindowFocus: false,
     })
 
     const setNewAgent = (agentType: AgentType, agent: Agent) => {
@@ -59,13 +60,19 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         setAgent(agent);
     };
 
+    React.useEffect(() => {
+        if(teamsQuery.data){
+            setTeams(teamsQuery.data)
+        }
+    }, [teamsQuery.data])
+
     return (
         <userContext.Provider
             value={{
                 agentType,
                 agent,
                 setAgent: setNewAgent,
-                teams: teamsQuery.data ?? [],
+                teams: teams ?? [],
                 setTeams: (teamDispatch: (teams: Team[]) => Team[]) => {
                         setTeams(teamDispatch)
                         },

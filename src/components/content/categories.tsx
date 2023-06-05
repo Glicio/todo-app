@@ -5,7 +5,7 @@ import CategoryComponent from './category_component';
 import AddBtn from '../input/add_btn';
 import AddCategory from '../forms/add_category';
 import { useDisclosure } from '@mantine/hooks';
-import type { Category, User } from '@prisma/client';
+import type { Category } from '@prisma/client';
 import type SimpleUser from '~/utils/simple_user';
 
 
@@ -22,12 +22,12 @@ export default function Categories() {
         },
         {
             enabled: !!agent?.id && !!agentType,
-            cacheTime: 0,
+            refetchOnWindowFocus: false,
+            cacheTime: 50000,
         }
     );
 
     const [categories, setCategories] = React.useState<(Category & {createdBy: SimpleUser, updatedBy: SimpleUser | null})[]>([]);
-    
     React.useEffect(() => {
         if (categoriesMutation.data) {
             setCategories(categoriesMutation.data);

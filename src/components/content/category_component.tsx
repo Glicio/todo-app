@@ -11,8 +11,12 @@ import ErrorIcon from "../icons/erro_icon";
 import Prompt from "../forms/prompt";
 import { userContext } from "~/contexts/UserProvider";
 import type SimpleUser from "~/utils/simple_user";
+import { TodoContext } from "~/contexts/TodoContext";
 
-type CategoryWithUsers = Category & { createdBy: SimpleUser; updatedBy: SimpleUser | null };
+type CategoryWithUsers = Category & {
+    createdBy: SimpleUser;
+    updatedBy: SimpleUser | null;
+};
 export default function CategoryComponent({
     category,
     onEdit,
@@ -30,12 +34,30 @@ export default function CategoryComponent({
     const [deleted, setDeleted] = React.useState(false);
     const [deleteTodos, setDeleteTodos] = React.useState(false);
     const { agent, agentType } = React.useContext(userContext);
+    const { setCategories, setTodos } = React.useContext(TodoContext);
 
     const deleteMutation = api.category.deleteCategory.useMutation({
         onSuccess: () => {
             setDeleted(true);
             setTimeout(() => {
                 onDelete(category.id);
+                setCategories((prev) =>
+                    prev.filter((c) => c.id !== category.id)
+                );
+                if (deleteTodos) {
+                    setTodos((prev) =>
+                        prev.filter((t) => t.categoryId !== category.id)
+                    );
+                } else {
+                    setTodos((prev) =>
+                        prev.map((t) => {
+                            if (t.categoryId === category.id) {
+                                return { ...t, categoryId: null, category: null };
+                            }
+                            return t;
+                        })
+                    );
+                }
             }, 500);
         },
         onError: (error) => {

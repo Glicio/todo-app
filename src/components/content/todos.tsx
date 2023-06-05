@@ -56,7 +56,7 @@ export default function Todos({done}: {done: boolean}) {
                 opened={showAddTodo}
                 onAdd={(todo) => addTodo(todo)}
             />
-            {!showAddTodo && (
+            {!showAddTodo && !done && (
                 <AddBtn onClick={() => setShowAddTodo(true)} />
             )}
             <div className="flex flex-col gap-2 p-2 ">

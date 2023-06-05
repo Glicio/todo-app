@@ -11,6 +11,8 @@ import { notifications } from "@mantine/notifications";
 import ErrorIcon from "../icons/erro_icon";
 import { useDisclosure } from "@mantine/hooks";
 import type SimpleUser from "~/utils/simple_user";
+import { TodoContext } from "~/contexts/TodoContext";
+import SimpleCategory from "~/utils/simple_category";
 
 interface CategoryForm {
     id?: string;
@@ -44,14 +46,20 @@ export default function AddCategory({
         categoryToEdit ? categoryToEdit : initialCategory
     );
     const { agent, agentType } = React.useContext(userContext);
-
+    const {setCategories} = React.useContext(TodoContext)
     const [colorError, { open: openColorError, close: closeColorError }] =
         useDisclosure();
 
     const addCategory = api.category.createCategory.useMutation({
         onSuccess: (data) => {
             onClose();
+            const newCategory: SimpleCategory = {
+                id: data.id,
+                name: data.name,
+                color: data.color,
+            }
             if (onAdd) {
+                setCategories((prev) => [...prev, newCategory])
                 onAdd(data);
             }
         },

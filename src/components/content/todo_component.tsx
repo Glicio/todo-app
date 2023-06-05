@@ -70,10 +70,10 @@ export default function TodoComponent({
                 autoClose: 1000,
             });
         },
-        onSuccess: () => {
+        onSuccess: (data) => {
             setFade(true);
             setTimeout(() => {
-                onDone(todo.id);
+                onEdit({...todo, done: true});
             }, 100);
         }
 
@@ -90,13 +90,13 @@ export default function TodoComponent({
         onSuccess: () => {
             setFade(true);
             setTimeout(() => {
-                onDone(todo.id);
+                onEdit({...todo, done: false});
             }, 100);
         }
     })
 
     return (
-        <div key={todo.id} className={`flex flex-col ${fade ? "fadeOut" : ""}`}>
+        <div key={todo.id} className={`flex flex-col fadeIn ${fade ? "fadeOut" : ""}`}>
             <ModalContainer opened={confirmDelete} onClose={closeConfirmDelete}>
                 <div className="m-auto flex h-fit w-fit flex-col items-center justify-center gap-4 rounded-md border bg-[var(--primary-color)] p-2">
                     <h1 className="text-2xl font-bold">Delete todo</h1>
@@ -205,7 +205,7 @@ export default function TodoComponent({
                                 agentType: agentType
                             })
                         }}>
-                            <Undo /> Undo
+                            {undoMutation.isLoading ? <LoadingIcon color="white"/> : <Undo />} Undo
                         </button>
                     ) : (
                         <button className="flex items-center gap-2 text-green-400 " 
