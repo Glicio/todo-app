@@ -10,6 +10,7 @@ import type { Category, User } from "@prisma/client";
 import { notifications } from "@mantine/notifications";
 import ErrorIcon from "../icons/erro_icon";
 import { useDisclosure } from "@mantine/hooks";
+import type SimpleUser from "~/utils/simple_user";
 
 interface CategoryForm {
     id?: string;
@@ -27,11 +28,11 @@ export default function AddCategory({
 }: {
     opened: boolean;
     onClose: () => void;
-    onAdd?: (category: Category & { createdBy: User }) => void;
+    onAdd?: (category: Category & { createdBy: SimpleUser }) => void;
     onEdit?: (
-        category: Category & { createdBy: User; updatedBy: User }
+        category: Category & { createdBy: SimpleUser; updatedBy: SimpleUser }
     ) => void;
-    categoryToEdit?: Category & { createdBy: User };
+    categoryToEdit?: Category & { createdBy: SimpleUser};
 }) {
     const initialCategory = {
         id: "",

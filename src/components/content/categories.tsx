@@ -6,6 +6,7 @@ import AddBtn from '../input/add_btn';
 import AddCategory from '../forms/add_category';
 import { useDisclosure } from '@mantine/hooks';
 import type { Category, User } from '@prisma/client';
+import type SimpleUser from '~/utils/simple_user';
 
 
 
@@ -25,7 +26,7 @@ export default function Categories() {
         }
     );
 
-    const [categories, setCategories] = React.useState<(Category & {createdBy: User, updatedBy: User | null})[]>([]);
+    const [categories, setCategories] = React.useState<(Category & {createdBy: SimpleUser, updatedBy: SimpleUser | null})[]>([]);
     
     React.useEffect(() => {
         if (categoriesMutation.data) {
@@ -36,7 +37,7 @@ export default function Categories() {
     const removeCategory = (id: string) => {
         setCategories((prev) => prev.filter((category) => category.id !== id));
     }
-    const updateCategory = (category: Category & {createdBy: User, updatedBy: User | null}) => {
+    const updateCategory = (category: Category & {createdBy: SimpleUser, updatedBy: SimpleUser | null}) => {
         setCategories((prev) => prev.map(
             (prevCategory) => prevCategory.id === category.id ? category : prevCategory
         ));

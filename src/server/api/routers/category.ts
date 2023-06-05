@@ -5,6 +5,7 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { db, prisma } from "~/server/db";
 import checkUserInTeam from "~/utils/check_usr_in_team";
 import type { User } from "@prisma/client";
+import SimpleUser from "~/utils/simple_user";
 
 export const category = createTRPCRouter({
     /**
@@ -58,8 +59,16 @@ export const category = createTRPCRouter({
                             agentId,
                     },
                     include: {
-                        createdBy: input.includeUser,
-                        updatedBy: input.includeUser,
+                        createdBy: input.includeUser ? {
+                            select: {
+                                id: true,
+                                name: true,
+                            }} : undefined,
+                        updatedBy: input.includeUser ? {
+                            select: {
+                                id: true,
+                                name: true,
+                            }} : undefined,
                     },
                 });
                 return categories;
@@ -137,9 +146,13 @@ export const category = createTRPCRouter({
                     where: {
                         id: ctx.session.user.id,
                     },
+                    select: {
+                        id: true,
+                        name: true,
+                    },
                 });
                const [category,_, user] = await prisma.$transaction([newCategory, agent, userQuery]);
-                return {...category, createdBy: user as User};
+                return {...category, createdBy: user as SimpleUser};
             } catch (e) {
                 console.log(e);
                 throw new TRPCError({
@@ -331,6 +344,10 @@ export const category = createTRPCRouter({
                         where: {
                             id: updatedCategory.createdById,
                         },
+                        select: {
+                            id: true,
+                            name: true,
+                        },
                     });
                     
                     if(!userQuery) throw new TRPCError({code: "INTERNAL_SERVER_ERROR", message: "Error while updating category"});
@@ -342,6 +359,10 @@ export const category = createTRPCRouter({
                     const updatedByQuery = await prisma.user.findUnique({
                         where: {
                             id: ctx.session.user.id,
+                        },
+                        select: {
+                            id: true,
+                            name: true,
                         },
                     });
 

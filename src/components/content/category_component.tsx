@@ -1,4 +1,4 @@
-import type { Category, User } from "@prisma/client";
+import type { Category } from "@prisma/client";
 import React from "react";
 import { api } from "~/utils/api";
 import ActionButton from "../input/action_button";
@@ -10,8 +10,9 @@ import { notifications } from "@mantine/notifications";
 import ErrorIcon from "../icons/erro_icon";
 import Prompt from "../forms/prompt";
 import { userContext } from "~/contexts/UserProvider";
+import type SimpleUser from "~/utils/simple_user";
 
-type CategoryWithUsers = Category & { createdBy: User; updatedBy: User | null };
+type CategoryWithUsers = Category & { createdBy: SimpleUser; updatedBy: SimpleUser | null };
 export default function CategoryComponent({
     category,
     onEdit,
