@@ -117,7 +117,8 @@ export default function Todos({done}: {done: boolean}) {
                 {todos &&
                     todos
                         .filter((todo) => {
-                            if (selectedCategory.length === 0 || !todo.categoryId) return true;
+                            if (selectedCategory.length === 0) return true;
+                            if(!todo.categoryId) return false
                             return selectedCategory.includes(todo.categoryId);
                         })
                         .map((todo) => (
