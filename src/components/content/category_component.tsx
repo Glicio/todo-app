@@ -24,10 +24,11 @@ export default function CategoryComponent({
     const [opened, setOpened] = React.useState(false);
     const [interacted, setInteracted] = React.useState(false);
     const [editOpened, { open: openEdit, close: closeEdit }] = useDisclosure();
-    const [deleteOpened, { open: openDelete, close: closeDelete }] = useDisclosure();
+    const [deleteOpened, { open: openDelete, close: closeDelete }] =
+        useDisclosure();
     const [deleted, setDeleted] = React.useState(false);
     const [deleteTodos, setDeleteTodos] = React.useState(false);
-    const {agent, agentType} = React.useContext(userContext);
+    const { agent, agentType } = React.useContext(userContext);
 
     const deleteMutation = api.category.deleteCategory.useMutation({
         onSuccess: () => {
@@ -70,21 +71,22 @@ export default function CategoryComponent({
                 />
             )}
             <Prompt
-            title="Delete category"
-            message="Are you sure you want to delete this category?"
-            opened={deleteOpened}
-            onClose={closeDelete}
-            onConfirm={() => {
-                if(!agent || !agentType) return;
-                deleteMutation.mutate({
-                    categoryId: category.id,
-                    agentId: agent.id,
-                    agentType: agentType,
-                    deleteTodos: deleteTodos,
-                });
-            }}
+                loading={deleteMutation.isLoading}
+                title="Delete category"
+                message="Are you sure you want to delete this category?"
+                opened={deleteOpened}
+                onClose={closeDelete}
+                onConfirm={() => {
+                    if (!agent || !agentType) return;
+                    deleteMutation.mutate({
+                        categoryId: category.id,
+                        agentId: agent.id,
+                        agentType: agentType,
+                        deleteTodos: deleteTodos,
+                    });
+                }}
             >
-                <div className="flex gap-2 items-center text-sm">
+                <div className="flex items-center gap-2 text-sm">
                     <input
                         type="checkbox"
                         name="delete"
@@ -94,7 +96,9 @@ export default function CategoryComponent({
                             setDeleteTodos(e.target.checked);
                         }}
                     />
-                        <label htmlFor="delete">Delete the todos of this category</label>
+                    <label htmlFor="delete">
+                        Delete the todos of this category
+                    </label>
                 </div>
             </Prompt>
             <button
@@ -141,13 +145,18 @@ export default function CategoryComponent({
                             </div>
                         )}
                     </div>
-                    {category.description ? <div className="flex flex-col">
-                        <span className="font-bold">Description:</span>
-                        {category.description}
-                    </div> : null}
+                    {category.description ? (
+                        <div className="flex flex-col overflow-hidden ">
+                            <span className="font-bold">Description:</span>
+                            <p className="text-ellipsis">
+                                {category.description}
+                            </p>
+                        </div>
+                    ) : null}
                 </div>
-                <div className="flex justify-evenly border-t py-2"
-                    style={{borderColor: category.color || ""}}
+                <div
+                    className="flex justify-evenly border-t py-2"
+                    style={{ borderColor: category.color || "" }}
                 >
                     <ActionButton
                         icon={<Trash />}
