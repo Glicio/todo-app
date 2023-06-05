@@ -57,7 +57,6 @@ export default function Todos({done}: {done: boolean}) {
             <AddTodo
                 close={() => setShowAddTodo(false)}
                 opened={showAddTodo}
-                onSave={() => void todosQuery.refetch()}
                 onAdd={(todo) => addTodo(todo)}
             />
             {!showAddTodo && (
