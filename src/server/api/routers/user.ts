@@ -23,10 +23,15 @@ export const user = createTRPCRouter({
                 userId: ctx.session.user.id,
             },
         });
-
-        const [teams, todos] = await prisma.$transaction([
+        const categoriesCount = prisma.category.count({
+            where: {
+                userId: ctx.session.user.id,
+            },
+        });
+        const [teams, todos, categories] = await prisma.$transaction([
             teamsCount,
             todosCount,
+            categoriesCount,
         ]);
 
         const updatedUser = await prisma.user.update({
@@ -36,6 +41,7 @@ export const user = createTRPCRouter({
             data: {
                 teamsCreatedCount: teams,
                 todosCreatedCount: todos,
+                categoriesCreatedCount: categories,
             },
         });
         return updatedUser;

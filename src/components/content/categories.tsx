@@ -5,7 +5,7 @@ import CategoryComponent from './category_component';
 import AddBtn from '../input/add_btn';
 import AddCategory from '../forms/add_category';
 import { useDisclosure } from '@mantine/hooks';
-import { Category } from '@prisma/client';
+import type { Category, User } from '@prisma/client';
 
 
 
@@ -17,7 +17,7 @@ export default function Categories() {
         {
             agentId: agent?.id as string,
             agentType: agentType,
-            prisma: false,
+            includeUser: true,
         },
         {
             enabled: !!agent?.id && !!agentType,
@@ -25,24 +25,35 @@ export default function Categories() {
         }
     );
 
-    const [categories, setCategories] = React.useState<Category[]>([]);
+    const [categories, setCategories] = React.useState<(Category & {createdBy: User, updatedBy: User | null})[]>([]);
     
     React.useEffect(() => {
         if (categoriesMutation.data) {
             setCategories(categoriesMutation.data);
         }
     }, [categoriesMutation.data]);
+    
+    const removeCategory = (id: string) => {
+        setCategories((prev) => prev.filter((category) => category.id !== id));
+    }
+    const updateCategory = (category: Category & {createdBy: User, updatedBy: User | null}) => {
+        setCategories((prev) => prev.map(
+            (prevCategory) => prevCategory.id === category.id ? category : prevCategory
+        ));
+    }
 
 
     return (
         <div>
             <AddCategory opened={addCategory} onClose={closeAddCategory} onAdd={(category) => {
-                setCategories((prev) => [...prev, category]);
+                setCategories((prev) => [...prev, {...category, updatedBy: null}]);
             }}/>
             <AddBtn onClick={openAddCategory}/> 
-            {categories.map((category) => (
-                <CategoryComponent key={category.id} category={category}/>
-            ))}
+            <div className="flex flex-col gap-2 p-2">
+                {categories.map((category) => (
+                    <CategoryComponent key={category.id} category={category} onDelete={(id) => removeCategory(id)} onEdit={(category) => updateCategory(category)}/>
+                ))}
+            </div>
         </div>
     )
 }

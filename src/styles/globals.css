@@ -9,6 +9,9 @@
     --secondary-color: #502FAC;
     --tertiary-color: #4a5568;
     --gray-300: rgb(209,213,219);
+    --red-400: rgb(248 113 113);
+    --yellow-400: rgb(250 204 21);
+    --green-400: rgb(74 222 128);
 }
 
 .primary-text-input{
