@@ -45,11 +45,11 @@ const teamReducer = (
 const AddTeam = ({
     opened,
     onClose,
-    refetchTeams,
+    addTeam,
 }: {
     opened: boolean;
     onClose: () => void;
-    refetchTeams: () => void;
+    addTeam: (team: Team) => void;
 }) => {
     const [teamState, dispatch] = React.useReducer(
         teamReducer,
@@ -57,8 +57,9 @@ const AddTeam = ({
     );
 
     const createTeamMutation = api.teams.createTeam.useMutation({
-        onSuccess: () => {
-            refetchTeams();
+        onSuccess: (data) => {
+            if(!data) return;
+            addTeam(data);
             notifications.show({
                 title: "Team created",
                 message: "Team created successfully",
@@ -160,8 +161,7 @@ export default function TeamSelect() {
 
     const ref = React.useRef<HTMLDivElement>(null);
 
-    const userTeams = api.teams.getUserTeams.useQuery(undefined);
-
+    const {teams: userTeams, setTeams} = React.useContext(userContext);
     React.useEffect(() => {
         const listener = (e: MouseEvent) => {
             if (
@@ -187,8 +187,10 @@ export default function TeamSelect() {
             <AddTeam
                 opened={addMenuOpened}
                 onClose={closeAddMenu}
-                refetchTeams={() => {
-                    void userTeams.refetch();
+                addTeam={(newTeam) => {
+                    setTeams(old => 
+                        [...old, newTeam]
+                    )
                 }}
             />
             <div className="relative max-w-[50%] " ref={ref}>
@@ -243,7 +245,7 @@ export default function TeamSelect() {
                                 Your teams
                             </span>
                             <div className="thin-scroll flex max-h-[10rem] flex-col gap-1 overflow-y-auto">
-                                {userTeams.data?.map((team) => (
+                                {userTeams.map((team) => (
                                     <SelectButton
                                         key={team.id}
                                         name={team.name}

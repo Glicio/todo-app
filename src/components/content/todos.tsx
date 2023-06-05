@@ -1,45 +1,23 @@
 import React from "react";
-import { api } from "~/utils/api";
 import AddTodo from "../forms/add_todo";
 import CategoryLabel from "../misc/category_label";
 import CloseIcon from "../icons/close";
-import { userContext } from "~/contexts/UserProvider";
 import AddBtn from "../input/add_btn";
 import type SimpleTodo from "~/utils/simple_todo";
-import type SimpleCategory from "~/utils/simple_category";
 import TodoComponent from "./todo_component";
+import { TodoContext } from "~/contexts/TodoContext";
+import SimpleCategory from "~/utils/simple_category";
 
 
 
 export default function Todos({done}: {done: boolean}) {
-    const { agent, agentType } = React.useContext(userContext);
 
-    const todosQuery = api.todos.getUserTodos.useQuery(
-        { done: done, agentId: agent?.id || "", agentType: agentType },
-        {
-            enabled: !!agent && !!agentType,
-            refetchOnMount: true,
-        }
-    );
 
-    const [todos, setTodos] = React.useState<SimpleTodo[]>([]);
     const [showAddTodo, setShowAddTodo] = React.useState(false);
     const [selectedCategory, setSelectedCategory] = React.useState<string[]>([]);
-    const [categories, setCategories] = React.useState<SimpleCategory[]>([]);
-
-    React.useEffect(() => {
-        if (todosQuery.data) {
-            setTodos(todosQuery.data.todos); 
-            setCategories(todosQuery.data.categories);
-          }
-    }, [todosQuery.data]);
-
-    if (todosQuery.isLoading)
-        return (
-            <div className="flex h-screen items-center justify-center">
-                <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-gray-900"></div>
-            </div>
-        );
+    const {todos, categories, setTodos, isLoading} = React.useContext(TodoContext);
+    const [todosList, setTodosList] = React.useState<SimpleTodo[]>([]);
+    const [categoriesList, setCategoriesList] = React.useState<SimpleCategory[]>([]);
 
     const removeTodo = (id: string) => {
         setTodos((old) => {
@@ -50,7 +28,26 @@ export default function Todos({done}: {done: boolean}) {
     const addTodo = (todo: SimpleTodo) => {
         setTodos((old) => [...old, todo]);
     };
+    
+    React.useEffect(() => {
+        if(done){
+            setTodosList(todos.filter(todo => todo.done))
+        }else{
+            setTodosList(todos.filter(todo => !todo.done))
+        }
+    }, [todos, done])
 
+    React.useEffect(() => {
+        const activeCategories = todosList.map(todo => todo.categoryId).filter((id) => id !== undefined) as string[]
+        setCategoriesList(categories.filter(category => activeCategories.includes(category.id)))
+    }, [categories, todosList])
+
+    if (isLoading)
+        return (
+            <div className="flex h-screen items-center justify-center">
+                <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-gray-900"></div>
+            </div>
+        );
 
     return (
         <div>
@@ -81,8 +78,8 @@ export default function Todos({done}: {done: boolean}) {
                             </div>
 
                             <div className="thin-scroll flex gap-2 overflow-auto pb-2 pt-1">
-                                {categories &&
-                                    categories.map((category) => (
+                                {categoriesList &&
+                                    categoriesList.map((category) => (
                                         <CategoryLabel
                                             active={selectedCategory.includes(
                                                 category.id
@@ -114,8 +111,8 @@ export default function Todos({done}: {done: boolean}) {
                         <div className="my-2 border-b border-[var(--tertiary-color)]"></div>{" "}
                     </>
                 ) : null}
-                {todos &&
-                    todos
+                {todosList &&
+                    todosList
                         .filter((todo) => {
                             if (selectedCategory.length === 0) return true;
                             if(!todo.categoryId) return false
@@ -131,8 +128,16 @@ export default function Todos({done}: {done: boolean}) {
                                 onDone={(id) => {
                                     removeTodo(id);
                                 }}
-                                onEdit={() => {
-                                    void todosQuery.refetch();
+                                onEdit={(newTodo) => {
+                                    setTodos((old) => {
+                                        return old.map((t) => {
+                                            if (t.id === todo.id) {
+                                                return newTodo
+                                                ;
+                                            }
+                                            return t;
+                                        });
+                                    });
                                 }}
                             />
                         ))}

@@ -27,7 +27,7 @@ export default function TodoComponent({
 }: {
     todo: SimpleTodo;
     onDelete: (id: string) => void;
-    onEdit: (todo: Todo) => void;
+    onEdit: (todo: SimpleTodo) => void;
     onDone: (id: string) => void;
 }) {
     const { agent, agentType } = React.useContext(userContext);

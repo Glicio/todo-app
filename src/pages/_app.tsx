@@ -8,6 +8,7 @@ import "~/styles/globals.css";
 import { UserProvider } from "~/contexts/UserProvider";
 import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
+import { TodoProvider } from "~/contexts/TodoContext";
 
 const MyApp: AppType<{ session: Session | null }> = ({
     Component,
@@ -18,7 +19,9 @@ const MyApp: AppType<{ session: Session | null }> = ({
             <MantineProvider withGlobalStyles withNormalizeCSS theme={{ colorScheme: 'dark'}}>
                 <Notifications />
                 <UserProvider>
+                    <TodoProvider>
                     <Component {...pageProps} />
+                    </TodoProvider>
                 </UserProvider>
             </MantineProvider>
         </SessionProvider>

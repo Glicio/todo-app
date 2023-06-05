@@ -10,6 +10,7 @@ import TextInput from "../input/text_input";
 import FormItem from "../input/form_item";
 import FormActions from "../input/form_actions";
 import SimpleTodo from "~/utils/simple_todo";
+import { TodoContext } from "~/contexts/TodoContext";
 
 interface TodoState {
     title: string;
@@ -47,16 +48,7 @@ export default function AddTodo({
     onAdd?: (todo: SimpleTodo) => void;
 }) {
     const { agent, agentType } = React.useContext(userContext);
-
-    const categoriesQuery = api.category.getAgentCategories.useQuery(
-        {
-            agentId: agent?.id || "",
-            agentType: agentType,
-        },
-        {
-            enabled: !!agent && !!agentType,
-        }
-    );
+    const {categories} = React.useContext(TodoContext)
 
     const addTodo = api.todos.createTodo.useMutation({
         onSuccess: (data) => {
@@ -117,7 +109,7 @@ export default function AddTodo({
                             className="primary-select bg-white"
                         >
                             <option value="">No category</option>
-                            {categoriesQuery.data?.map((category) => (
+                            {categories.map((category) => (
                                 <option key={category.id} value={category.id}>
                                     {category.name}
                                 </option>
