@@ -2,7 +2,6 @@ import React from "react";
 import { api } from "~/utils/api";
 import Todo from "./todo_component";
 import AddTodo from "../forms/add_todo";
-import AddIcon from "../icons/add";
 import CategoryLabel from "../misc/category_label";
 import CloseIcon from "../icons/close";
 import { userContext } from "~/contexts/UserProvider";

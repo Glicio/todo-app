@@ -1,4 +1,4 @@
-import { Category, User } from "@prisma/client";
+import type { Category, User } from "@prisma/client";
 import React from "react";
 import { api } from "~/utils/api";
 import ActionButton from "../input/action_button";
