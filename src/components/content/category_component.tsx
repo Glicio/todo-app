@@ -4,7 +4,7 @@ import { api } from "~/utils/api";
 import ActionButton from "../input/action_button";
 import Trash from "../icons/trash";
 import Edit from "../icons/edit";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import AddCategory from "../forms/add_category";
 import { notifications } from "@mantine/notifications";
 import ErrorIcon from "../icons/erro_icon";
@@ -12,6 +12,7 @@ import Prompt from "../forms/prompt";
 import { userContext } from "~/contexts/UserProvider";
 import type SimpleUser from "~/utils/simple_user";
 import { TodoContext } from "~/contexts/TodoContext";
+import ChevronUpDown from "../icons/chevron_up_down";
 
 type CategoryWithUsers = Category & {
     createdBy: SimpleUser;
@@ -35,6 +36,8 @@ export default function CategoryComponent({
     const [deleteTodos, setDeleteTodos] = React.useState(false);
     const { agent, agentType } = React.useContext(userContext);
     const { setCategories, setTodos } = React.useContext(TodoContext);
+
+    const isMobile = useMediaQuery("(max-width: 768px)");
 
     const deleteMutation = api.category.deleteCategory.useMutation({
         onSuccess: () => {
@@ -82,7 +85,7 @@ export default function CategoryComponent({
 
     return (
         <div
-            className={`rounded-md border ${deleted ? "fadeOut" : ""}`}
+            className={`rounded-md border flex flex-col ${deleted ? "fadeOut" : ""}`}
             style={{ borderColor: category.color || "" }}
         >
             {editOpened && (
@@ -125,25 +128,28 @@ export default function CategoryComponent({
                 </div>
             </Prompt>
             <button
-                className="w-full p-2 text-left"
+                className="w-full p-2 text-left flex justify-between items-center"
                 onClick={() => {
                     if (!interacted) setInteracted(true);
                     setOpened((old) => !old);
                 }}
             >
-                {category.name}
+                <span className="font-bold h-fit">
+                    {category.name}
+                </span>
+                {isMobile ? <ChevronUpDown/> : null}
             </button>
             <div
-                className={`${
+                className={`${isMobile ? (
                     interacted
                         ? opened
                             ? "open"
                             : "close"
-                        : "max-h-0 overflow-hidden"
-                }`}
+                        : "max-h-0 overflow-hidden" ) : ""}
+                flex flex-col h-full `}
             >
                 <div className="mx-2 border-b"></div>
-                <div className="p-2">
+                <div className="p-2 ">
                     <div className="flex flex-col pb-2">
                         <div className="flex gap-1 text-xs">
                             <span className="">Created by</span>
@@ -178,7 +184,7 @@ export default function CategoryComponent({
                     ) : null}
                 </div>
                 <div
-                    className="flex justify-evenly border-t py-2"
+                    className="flex justify-evenly border-t py-2 mt-auto"
                     style={{ borderColor: category.color || "" }}
                 >
                     <ActionButton

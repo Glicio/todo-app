@@ -69,7 +69,7 @@ model Todo {
     dueDate     DateTime?
     //timestamps
     createdAt   DateTime @default(now())
-    updatedAt   DateTime? @updatedAt
+    updatedAt   DateTime? 
     doneAt      DateTime?
     //relationships
     //todos can be owned by a user or a team

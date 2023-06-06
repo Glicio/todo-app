@@ -6,16 +6,14 @@ import Edit from "../icons/edit";
 import { api } from "~/utils/api";
 import { userContext } from "~/contexts/UserProvider";
 import { notifications } from "@mantine/notifications";
-import { type Todo } from "@prisma/client";
 import ModalContainer from "../containers/modal_container";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import LoadingIcon from "../misc/loading_icon";
-import type SimpleCategory from "~/utils/simple_category";
-import SimpleTodo from "~/utils/simple_todo";
+import type SimpleTodo from "~/utils/simple_todo";
+import { Tooltip } from "@mantine/core";
+import ChevronUpDown from "../icons/chevron_up_down";
 
-
-
-const disabled_color = "rgb(209,213,219)"
+const disabled_color = "rgb(209,213,219)";
 /**
  * The main todo component.
  * */
@@ -33,10 +31,12 @@ export default function TodoComponent({
     const { agent, agentType } = React.useContext(userContext);
     const [todoActive, setTodoActive] = React.useState(false);
     const [fade, setFade] = React.useState(false);
+    const [interacted, setInteracted] = React.useState(false);
     const [
         confirmDelete,
         { open: openConfirmDelete, close: closeConfirmDelete },
     ] = useDisclosure();
+    const mobile = useMediaQuery("(max-width: 768px)");
 
     const deleteMutation = api.todos.deleteTodo.useMutation({
         onSuccess: () => {
@@ -70,14 +70,13 @@ export default function TodoComponent({
                 autoClose: 1000,
             });
         },
-        onSuccess: (data) => {
+        onSuccess: () => {
             setFade(true);
             setTimeout(() => {
-                onEdit({...todo, done: true});
+                onEdit({ ...todo, done: true });
             }, 100);
-        }
-
-    })
+        },
+    });
     const undoMutation = api.todos.undoTodo.useMutation({
         onError: (error) => {
             notifications.show({
@@ -90,13 +89,18 @@ export default function TodoComponent({
         onSuccess: () => {
             setFade(true);
             setTimeout(() => {
-                onEdit({...todo, done: false});
+                onEdit({ ...todo, done: false });
             }, 100);
-        }
-    })
+        },
+    });
 
     return (
-        <div key={todo.id} className={`flex flex-col fadeIn ${fade ? "fadeOut" : ""}`}>
+        <div
+            key={todo.id}
+            className={`flex flex-col  ${
+                fade ? "fadeOut" : ""
+            } w-full max-w-[25rem] ${!mobile ? "h-[15rem]" : ""}`}
+        >
             <ModalContainer opened={confirmDelete} onClose={closeConfirmDelete}>
                 <div className="m-auto flex h-fit w-fit flex-col items-center justify-center gap-4 rounded-md border bg-[var(--primary-color)] p-2">
                     <h1 className="text-2xl font-bold">Delete todo</h1>
@@ -129,99 +133,159 @@ export default function TodoComponent({
                 </div>
             </ModalContainer>
 
-            <button
-                className={`todo-header w-full rounded-t-md border ${todoActive ? "rounded-b-none" : "rounded-b-md"
-                    }`}
-                onClick={() => setTodoActive((old) => !old)}
-                style={{
-                    borderColor: todo.category?.color
-                        ? todo.category.color
-                        : disabled_color,
-                    backgroundColor: todoActive
-                        ? todo.category?.color
-                            ? todo.category.color
-                            : disabled_color
-                        : "",
-                }}
-            >
-                <span className="mix-blend-difference font-medium bg-">
-                    {todo.title}
-                </span>
-            </button>
             <div
-                className="todo-body overflow-hidden transition-all ease-in-out"
+                className="flex h-full flex-col rounded-md border"
                 style={{
                     borderColor: todo.category?.color
                         ? todo.category.color
                         : disabled_color,
-                    maxHeight: todoActive ? "1000px" : "0px",
                 }}
             >
-                {todo.description || todo.dueDate ? (
+                <Tooltip
+                    label={todo.title}
+                    multiline
+                    openDelay={500}
+                    bg="black"
+                    color="white"
+                    style={{
+                        border: `1px solid ${
+                            todo.category?.color || "var(--secondary-color)"
+                        }`,
+                    }}
+                >
+                    <button
+                        className="flex w-full overflow-hidden overflow-ellipsis whitespace-nowrap p-2 text-left font-bold"
+                        onClick={() => {
+                            if (!interacted) setInteracted(true);
+                            setTodoActive((old) => !old);
+                        }}
+                    >
+                        <span className="w-full h-fit overflow-hidden text-ellipsis whitespace-nowrap">
+                            {todo.title}
+                        </span>
+                        {mobile ? <ChevronUpDown /> : null}
+                    </button>
+                </Tooltip>
+                <div
+                    className={` ${
+                        mobile
+                            ? interacted
+                                ? todoActive
+                                    ? "open"
+                                    : "close"
+                                : "max-h-0"
+                            : "h-full"
+                    } flex flex-col justify-between overflow-hidden`}
+                >
+                    <div className="flex flex-col">
+                        <div className="mx-2 border-b"></div>
+                        <div className="timestamps px-2 pt-1 text-xs">
+                            <div className="created">
+                                Created by{" "}
+                                <span className="font-bold">
+                                    {todo.createdBy.name}
+                                </span>{" "}
+                                at{" "}
+                                <span className="font-bold">
+                                    {new Date(todo.createdAt).toLocaleString()}
+                                </span>
+                            </div>
+                            {todo.updatedAt ? (
+                                <div className="updated">
+                                    Last update{" "}
+                                    {todo.updatedBy ? (
+                                        <>
+                                            {"by "}
+                                            <span className="font-bold">
+                                                {todo.updatedBy.name}
+                                            </span>{" "}
+                                        </>
+                                    ) : (
+                                        " "
+                                    )}
+                                    at{" "}
+                                    <span className="font-bold">
+                                        {new Date(
+                                            todo.updatedAt
+                                        ).toLocaleString()}
+                                    </span>
+                                </div>
+                            ) : null}
+                        </div>
+                        {todo.description ? (
+                            <div className="flex flex-col h-[8rem] p-2">
+                                <h3 className="font-bold">Description:</h3>
+                                <p className="max-h-full overflow-y-auto ">
+                                    {todo.description}
+                                </p>
+                            </div>
+                        ) : null}
+                    </div>
                     <div
-                        className="border-x border-t p-2"
+                        className="flex w-full items-center justify-evenly border-t py-2 "
                         style={{
                             borderColor: todo.category?.color
                                 ? todo.category.color
                                 : disabled_color,
                         }}
                     >
-                        {todo.dueDate ? (
-                            <span>
-                                {new Date(todo.dueDate).toLocaleDateString()}
-                            </span>
-                        ) : null}
-                        <p className="thin-scroll max-h-[18rem] overflow-y-auto ">
-                            {todo.description}
-                        </p>
-                    </div>
-                ) : null}
-                <div
-                    className="flex w-full items-center justify-center gap-8 rounded-b-md border border-x p-2"
-                    style={{
-                        borderColor: todo.category?.color
-                            ? todo.category.color
-                            : disabled_color,
-                    }}
-                >
-                    <button
-                        onClick={() => {
-                            openConfirmDelete();
-                        }}
-                        className="flex items-center gap-2 text-red-400"
-                    >
-                        <Trash /> Delete
-                    </button>
-                    {todo.done ? null : <button className="flex items-center gap-2 text-yellow-400">
-                        <Edit /> Edit
-                    </button>}
-                    {todo.done ? (
-                        <button className="flex items-center gap-2" onClick={() => {
-                            if(!agent || !agentType || !todo.id) return;
+                        <button
+                            onClick={() => {
+                                openConfirmDelete();
+                            }}
+                            className="flex items-center gap-2 text-red-400"
+                        >
+                            <Trash /> Delete
+                        </button>
+                        {todo.done ? null : (
+                            <button className="flex items-center gap-2 text-yellow-400">
+                                <Edit /> Edit
+                            </button>
+                        )}
+                        {todo.done ? (
+                            <button
+                                className="flex items-center gap-2"
+                                onClick={() => {
+                                    if (!agent || !agentType || !todo.id)
+                                        return;
 
-                            undoMutation.mutate({
-                                todoId: todo.id,
-                                agentId: agent.id,
-                                agentType: agentType
-                            })
-                        }}>
-                            {undoMutation.isLoading ? <LoadingIcon color="white"/> : <Undo />} Undo
-                        </button>
-                    ) : (
-                        <button className="flex items-center gap-2 text-green-400 " 
-                        disabled={doMutation.isLoading}
-                        onClick={() => {
-                            if (!agent || !agentType || !todo.id) return;
-                            doMutation.mutate({
-                                agentId: agent.id,
-                                agentType: agentType,
-                                todoId: todo.id
-                            })
-                        }
-                        }>
-                            {doMutation.isLoading ? <LoadingIcon color="rgb(74,222,128)"/> : <Check />} Done
-                        </button>
-                    )}
+                                    undoMutation.mutate({
+                                        todoId: todo.id,
+                                        agentId: agent.id,
+                                        agentType: agentType,
+                                    });
+                                }}
+                            >
+                                {undoMutation.isLoading ? (
+                                    <LoadingIcon color="white" />
+                                ) : (
+                                    <Undo />
+                                )}{" "}
+                                Undo
+                            </button>
+                        ) : (
+                            <button
+                                className="flex items-center gap-2 text-green-400 "
+                                disabled={doMutation.isLoading}
+                                onClick={() => {
+                                    if (!agent || !agentType || !todo.id)
+                                        return;
+                                    doMutation.mutate({
+                                        agentId: agent.id,
+                                        agentType: agentType,
+                                        todoId: todo.id,
+                                    });
+                                }}
+                            >
+                                {doMutation.isLoading ? (
+                                    <LoadingIcon color="rgb(74,222,128)" />
+                                ) : (
+                                    <Check />
+                                )}{" "}
+                                Done
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

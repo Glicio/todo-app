@@ -3,10 +3,10 @@ import AddTodo from "../forms/add_todo";
 import CategoryLabel from "../misc/category_label";
 import CloseIcon from "../icons/close";
 import AddBtn from "../input/add_btn";
-import type SimpleTodo from "~/utils/simple_todo";
 import TodoComponent from "./todo_component";
 import { TodoContext } from "~/contexts/TodoContext";
-import SimpleCategory from "~/utils/simple_category";
+import type SimpleCategory from "~/utils/simple_category";
+import type SimpleTodo from "~/utils/simple_todo";
 
 
 
@@ -18,7 +18,6 @@ export default function Todos({done}: {done: boolean}) {
     const {todos, categories, setTodos, isLoading} = React.useContext(TodoContext);
     const [todosList, setTodosList] = React.useState<SimpleTodo[]>([]);
     const [categoriesList, setCategoriesList] = React.useState<SimpleCategory[]>([]);
-
     const removeTodo = (id: string) => {
         setTodos((old) => {
             return old.filter((todo) => todo.id !== id);
@@ -59,88 +58,97 @@ export default function Todos({done}: {done: boolean}) {
             {!showAddTodo && !done && (
                 <AddBtn onClick={() => setShowAddTodo(true)} />
             )}
-            <div className="flex flex-col gap-2 p-2 ">
+            <div className="flex flex-col gap-2 flex-wrap">
                 {categories && categories.length > 0 ? (
                     <>
-                        <div>
-                            <div className="flex items-center gap-1">
-                                <span>Categories</span>
-                                {selectedCategory.length > 0 ? (
-                                    <button
-                                        className="h-4 w-4 text-xs"
-                                        onClick={() => {
-                                            setSelectedCategory([]);
-                                        }}
-                                    >
-                                        <CloseIcon />
-                                    </button>
-                                ) : null}
-                            </div>
-
-                            <div className="thin-scroll flex gap-2 overflow-auto pb-2 pt-1">
-                                {categoriesList &&
-                                    categoriesList.map((category) => (
-                                        <CategoryLabel
-                                            active={selectedCategory.includes(
-                                                category.id
-                                            )}
-                                            onClick={(categoryId) => {
-                                                if (
-                                                    selectedCategory.includes(
-                                                        category.id
-                                                    )
-                                                )
-                                                    return setSelectedCategory(
-                                                        selectedCategory.filter(
-                                                            (id) =>
-                                                                id !==
-                                                                categoryId
-                                                        )
-                                                    );
-                                                setSelectedCategory((old) => [
-                                                    ...old,
-                                                    categoryId,
-                                                ]);
+                        <div className="w-full h-20 "></div>
+                        <div className="h-20 overflow-hidden fixed w-full backdrop-blur p-2">
+                            <div className="relative">
+                                <div className="flex items-center gap-1">
+                                    <span>Categories</span>
+                                    {selectedCategory.length > 0 ? (
+                                        <button
+                                            className="h-4 w-4 text-xs"
+                                            onClick={() => {
+                                                setSelectedCategory([]);
                                             }}
-                                            key={category.id}
-                                            category={category}
-                                        />
-                                    ))}
+                                        >
+                                            <CloseIcon />
+                                        </button>
+                                    ) : null}
+                                </div>
+                            
+                                <div className="thin-scroll flex gap-2 overflow-auto pb-2 pt-1 ">
+                                    {categoriesList &&
+                                        categoriesList.map((category) => (
+                                            <CategoryLabel
+                                                active={selectedCategory.includes(
+                                                    category.id
+                                                )}
+                                                onClick={(categoryId) => {
+                                                    if (
+                                                        selectedCategory.includes(
+                                                            category.id
+                                                        )
+                                                    )
+                                                        return setSelectedCategory(
+                                                            selectedCategory.filter(
+                                                                (id) =>
+                                                                    id !==
+                                                                    categoryId
+                                                            )
+                                                        );
+                                                    setSelectedCategory((old) => [
+                                                        ...old,
+                                                        categoryId,
+                                                    ]);
+                                                }}
+                                                key={category.id}
+                                                category={category}
+                                            />
+                                        ))}
+                                </div>
                             </div>
+                            <div className="my-2 border-b border-[var(--tertiary-color)]"></div>{" "}
                         </div>
-                        <div className="my-2 border-b border-[var(--tertiary-color)]"></div>{" "}
                     </>
                 ) : null}
-                {todosList &&
-                    todosList
-                        .filter((todo) => {
-                            if (selectedCategory.length === 0) return true;
-                            if(!todo.categoryId) return false
-                            return selectedCategory.includes(todo.categoryId);
-                        })
-                        .map((todo) => (
-                            <TodoComponent
-                                key={todo.id}
-                                todo={todo}
-                                onDelete={(id) => {
-                                    removeTodo(id);
-                                }}
-                                onDone={(id) => {
-                                    removeTodo(id);
-                                }}
-                                onEdit={(newTodo) => {
-                                    setTodos((old) => {
-                                        return old.map((t) => {
-                                            if (t.id === todo.id) {
-                                                return newTodo
-                                                ;
-                                            }
-                                            return t;
+                <div className="todos flex flex-col items-center justify-center gap-2 w-full mx-auto md:grid px-2"
+                    style={{
+                        gridTemplateColumns: "repeat(auto-fill, 25rem)",
+                    }}
+                >
+                    {todosList &&
+                        todosList
+                            .filter((todo) => {
+                                if (selectedCategory.length === 0) return true;
+                                if(!todo.categoryId) return false
+                                return selectedCategory.includes(todo.categoryId);
+                            })
+                            .map((todo) => (
+                                <TodoComponent
+                                    key={todo.id}
+                                    todo={todo}
+                                    onDelete={(id) => {
+                                        removeTodo(id);
+                                    }}
+                                    onDone={(id) => {
+                                        removeTodo(id);
+                                    }}
+                                    onEdit={(newTodo) => {
+                                        setTodos((old) => {
+                                            return old.map((t) => {
+                                                if (t.id === todo.id) {
+                                                    return newTodo
+                                                    ;
+                                                }
+                                                return t;
+                                            });
                                         });
-                                    });
-                                }}
-                            />
-                        ))}
+                                    }}
+                                />
+                            ))}
+                </div>
                 <div className="h-14 w-full"></div>
             </div>
         </div>

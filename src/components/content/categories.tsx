@@ -50,7 +50,11 @@ export default function Categories() {
                 setCategories((prev) => [...prev, {...category, updatedBy: null}]);
             }}/>
             <AddBtn onClick={openAddCategory}/> 
-            <div className="flex flex-col gap-2 p-2">
+            <div className="flex flex-col gap-2 p-2 md:grid justify-center"
+                style={{
+                    gridTemplateColumns: "repeat(auto-fill, 25rem)",
+                }}
+            >
                 {categories.map((category) => (
                     <CategoryComponent key={category.id} category={category} onDelete={(id) => removeCategory(id)} onEdit={(category) => updateCategory(category)}/>
                 ))}
