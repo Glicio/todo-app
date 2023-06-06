@@ -154,7 +154,7 @@ export default function TodoComponent({
                     }}
                 >
                     <button
-                        className="flex w-full overflow-hidden overflow-ellipsis whitespace-nowrap p-2 text-left font-bold"
+                        className="flex w-full overflow-hidden overflow-ellipsis whitespace-nowrap p-2 text-left font-bold items-center"
                         onClick={() => {
                             if (!interacted) setInteracted(true);
                             setTodoActive((old) => !old);
