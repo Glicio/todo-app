@@ -37,8 +37,8 @@ export default function CategoryComponent({
     const { agent, agentType } = React.useContext(userContext);
     const { setCategories, setTodos } = React.useContext(TodoContext);
 
-    const isMobile = useMediaQuery("(max-width: 768px)");
-
+    const mobileQuery = useMediaQuery("(max-width: 768px)");
+    const [isMobile, setIsMobile] = React.useState(true);
     const deleteMutation = api.category.deleteCategory.useMutation({
         onSuccess: () => {
             setDeleted(true);
@@ -82,6 +82,12 @@ export default function CategoryComponent({
             });
         },
     });
+
+    React.useEffect(() => {
+        if(mobileQuery !== undefined) {
+        setIsMobile(mobileQuery);
+        }
+    }, [mobileQuery]);
 
     return (
         <div

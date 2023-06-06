@@ -36,7 +36,8 @@ export default function TodoComponent({
         confirmDelete,
         { open: openConfirmDelete, close: closeConfirmDelete },
     ] = useDisclosure();
-    const mobile = useMediaQuery("(max-width: 768px)");
+    const mobileQuery = useMediaQuery("(max-width: 768px)");
+    const [mobile, setMobile] = React.useState(true);
 
     const deleteMutation = api.todos.deleteTodo.useMutation({
         onSuccess: () => {
@@ -93,6 +94,12 @@ export default function TodoComponent({
             }, 100);
         },
     });
+
+    React.useEffect(() => {
+        if (mobileQuery !== undefined) {
+            setMobile(mobileQuery);
+        }
+    }, [mobileQuery]);
 
     return (
         <div
@@ -154,13 +161,13 @@ export default function TodoComponent({
                     }}
                 >
                     <button
-                        className="flex w-full overflow-hidden overflow-ellipsis whitespace-nowrap p-2 text-left font-bold items-center"
+                        className="flex w-full items-center overflow-hidden overflow-ellipsis whitespace-nowrap p-2 text-left font-bold"
                         onClick={() => {
                             if (!interacted) setInteracted(true);
                             setTodoActive((old) => !old);
                         }}
                     >
-                        <span className="w-full h-fit overflow-hidden text-ellipsis whitespace-nowrap">
+                        <span className="h-fit w-full overflow-hidden text-ellipsis whitespace-nowrap">
                             {todo.title}
                         </span>
                         {mobile ? <ChevronUpDown /> : null}
@@ -213,7 +220,7 @@ export default function TodoComponent({
                             ) : null}
                         </div>
                         {todo.description ? (
-                            <div className="flex flex-col h-[8rem] p-2">
+                            <div className="flex h-[8rem] flex-col p-2">
                                 <h3 className="font-bold">Description:</h3>
                                 <p className="max-h-full overflow-y-auto ">
                                     {todo.description}
