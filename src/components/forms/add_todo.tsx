@@ -77,10 +77,11 @@ export default function AddTodo({
     const [todo, dispatch] = React.useReducer(todoReducer, todoInitialState);
     const [activeDate, setActiveDate] = React.useState(false);
     return (
-        <ModalContainer opened={opened} onClose={close}>
-            <DefaultForm
-                title="Add new Todo"
-                onSubmit={() => {
+        <ModalContainer opened={opened} onClose={close} title="Add new to-do">
+            <form
+                className="w-full flex gap-2 flex-col"
+                onSubmit={(e) => {
+                    e.preventDefault();
                     if (!agent) return;
                     addTodo.mutate({
                         agentId: agent.id,
@@ -92,7 +93,6 @@ export default function AddTodo({
                     });
                 }}
             >
-                <div className="flex w-3/4 flex-col gap-2 p-4">
                     <FormItem label="Category">
                         <select
                             value={selectedCategory}
@@ -171,8 +171,7 @@ export default function AddTodo({
                         />
                     </FormItem>
                         <FormActions loading={addTodo.isLoading} onCancel={close}/>
-                </div>
-            </DefaultForm>
+            </form>
         </ModalContainer>
     );
 }

@@ -8,9 +8,6 @@ import ModalContainer from "../containers/modal_container";
 import DefaultForm from "../forms/default_form";
 import type { Team } from "@prisma/client";
 import { api } from "~/utils/api";
-import { ColorPicker } from "@mantine/core";
-import { validColors } from "~/utils/valid_colors";
-import LoadingIcon from "../misc/loading_icon";
 import { userContext } from "~/contexts/UserProvider";
 import Image from "next/image";
 import { notifications } from "@mantine/notifications";
@@ -107,10 +104,10 @@ const AddTeam = ({
     }, []);
 
     return (
-        <ModalContainer opened={opened} onClose={close}>
-            <DefaultForm
-                title="Create a new team"
-                onSubmit={() => {
+        <ModalContainer opened={opened} onClose={close} title="Create team">
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault()
                     createTeamMutation.mutate({
                         name: teamState.name,
                         color: teamState.color || "#000000",
@@ -122,7 +119,7 @@ const AddTeam = ({
                     <SelectColor color={teamState.color} setColor={(color) => dispatch({ type: "color", payload: color })} />
                     <FormActions onCancel={close} loading={createTeamMutation.isLoading}/>
                </div>
-            </DefaultForm>
+            </form>
         </ModalContainer>
     );
 };

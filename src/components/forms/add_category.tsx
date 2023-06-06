@@ -6,13 +6,13 @@ import SelectColor from "../input/select_color";
 import FormActions from "../input/form_actions";
 import { userContext } from "~/contexts/UserProvider";
 import { api } from "~/utils/api";
-import type { Category, User } from "@prisma/client";
+import type { Category } from "@prisma/client";
 import { notifications } from "@mantine/notifications";
 import ErrorIcon from "../icons/erro_icon";
 import { useDisclosure } from "@mantine/hooks";
 import type SimpleUser from "~/utils/simple_user";
 import { TodoContext } from "~/contexts/TodoContext";
-import SimpleCategory from "~/utils/simple_category";
+import type SimpleCategory from "~/utils/simple_category";
 
 interface CategoryForm {
     id?: string;
@@ -115,10 +115,10 @@ export default function AddCategory({
     });
 
     return (
-        <ModalContainer opened={opened} onClose={onClose}>
-            <DefaultForm
-                title={categoryToEdit ? "Edit Category" : "Create Category"}
-                onSubmit={() => {
+        <ModalContainer opened={opened} onClose={onClose} title="Add new category">
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault();
                     if (!agent || !agentType) {
                         return;
                     }
@@ -207,7 +207,7 @@ export default function AddCategory({
                         }
                     />
                 </div>
-            </DefaultForm>
+            </form>
         </ModalContainer>
     );
 }
