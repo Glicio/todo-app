@@ -75,7 +75,8 @@ export default function CategoryComponent({
                 return;
             }
             notifications.show({
-                title: "Error",
+                title: "Error", 
+                
                 message: "Error while deleting category",
                 color: "red",
                 icon: <ErrorIcon />,
