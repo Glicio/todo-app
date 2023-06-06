@@ -17,9 +17,9 @@ export default function ModalContainer({
         title={title}
         classNames={{
              overlay: "backdrop-blur",
-             header: "bg-[var(--primary-color)] border-t border-x border-[var(--secondary-color)] rounded-t-md",
-             body: "bg-[var(--primary-color)] border-x border-b border-[var(--secondary-color)] rounded-b-md",
-            content: "bg-[var(--primary-color)] w-fit"
+             header: "bg-[var(--primary-color)] ",
+             body: "bg-[var(--primary-color)] ",
+            content: "bg-[var(--primary-color)] w-fit border border-[var(--secondary-color)] rounded-b-md"
         }}>
             {children}
         </Modal>
