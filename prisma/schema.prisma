@@ -37,7 +37,7 @@ model Team {
     categoriesCount Int @default(0)
     //timestamps
     createdAt DateTime @default(now())
-    updatedAt DateTime 
+    updatedAt DateTime? 
     image  String?
     color  String?
     owner     User     @relation(name: "teamsCreated" ,fields: [ownerId], references: [id], onDelete: Cascade)
