@@ -24,7 +24,8 @@ const MyApp: AppType<{ session: Session | null }> = ({
             console.log("BEFORE", e);
         });
     }, []);
-    
+
+
     return (
         <>
         <Head>
