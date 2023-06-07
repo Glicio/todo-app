@@ -37,7 +37,9 @@ export default function TodoComponent({
         { open: openConfirmDelete, close: closeConfirmDelete },
     ] = useDisclosure();
     const mobileQuery = useMediaQuery("(max-width: 768px)");
-    const [mobile, setMobile] = React.useState(true);
+    const [mobile, setMobile] = React.useState(
+        typeof window !== undefined ? window.innerWidth <= 768 : true
+    );
 
     const deleteMutation = api.todos.deleteTodo.useMutation({
         onSuccess: () => {
@@ -94,6 +96,7 @@ export default function TodoComponent({
             }, 100);
         },
     });
+
 
     React.useEffect(() => {
         if (mobileQuery !== undefined) {
