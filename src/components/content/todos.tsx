@@ -17,6 +17,7 @@ export default function Todos({done}: {done: boolean}) {
     const [selectedCategory, setSelectedCategory] = React.useState<string[]>([]);
     const {todos, categories, setTodos, isLoading} = React.useContext(TodoContext);
     const [todosList, setTodosList] = React.useState<SimpleTodo[]>([]);
+    const [filteredTodos, setFilteredTodos] = React.useState<SimpleTodo[]>([]);
     const [categoriesList, setCategoriesList] = React.useState<SimpleCategory[]>([]);
     const removeTodo = (id: string) => {
         setTodos((old) => {
@@ -41,12 +42,25 @@ export default function Todos({done}: {done: boolean}) {
         setCategoriesList(categories.filter(category => activeCategories.includes(category.id)))
     }, [categories, todosList])
 
+    React.useEffect(() => {
+        if (selectedCategory.length > 0) {
+            setFilteredTodos(
+                todosList.filter((todo) =>
+                    selectedCategory.includes(todo.categoryId as string)
+                )
+            );
+        } else {
+            setFilteredTodos(todosList);
+        }
+    }, [selectedCategory, todosList]);
+
     if (isLoading)
         return (
             <div className="flex h-screen items-center justify-center">
                 <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-gray-900"></div>
             </div>
         );
+
 
     return (
         <div>
@@ -118,13 +132,8 @@ export default function Todos({done}: {done: boolean}) {
                         gridTemplateColumns: "repeat(auto-fill, 25rem)",
                     }}
                 >
-                    {todosList &&
-                        todosList
-                            .filter((todo) => {
-                                if (selectedCategory.length === 0) return true;
-                                if(!todo.categoryId) return false
-                                return selectedCategory.includes(todo.categoryId);
-                            })
+                    {filteredTodos &&
+                        filteredTodos
                             .map((todo) => (
                                 <TodoComponent
                                     key={todo.id}
