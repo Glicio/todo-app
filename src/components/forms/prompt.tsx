@@ -20,9 +20,8 @@ export default function Prompt({
     children?: React.ReactNode;
 }) {
     return (
-        <ModalContainer opened={opened} onClose={onClose}>
-            <div className="m-auto flex h-fit w-fit flex-col items-center justify-center gap-4 rounded-md border bg-[var(--primary-color)] p-2">
-                <h1 className="text-2xl font-bold">{title}</h1>
+        <ModalContainer opened={opened} onClose={onClose} title={title}>
+            <div className="m-auto flex h-fit w-fit flex-col items-center justify-center gap-4 rounded-md bg-[var(--primary-color)] p-2">
                 <p>{message}</p>
                 {children ? children : null}
                 <div className="flex w-full justify-center gap-4">
