@@ -111,10 +111,9 @@ export default function TodoComponent({
                 fade ? "fadeOut" : ""
             } w-full max-w-[25rem] ${!mobile ? "h-[15rem]" : ""}`}
         >
-            <ModalContainer opened={confirmDelete} onClose={closeConfirmDelete}>
-                <div className="m-auto flex h-fit w-fit flex-col items-center justify-center gap-4 rounded-md border bg-[var(--primary-color)] p-2">
-                    <h1 className="text-2xl font-bold">Delete todo</h1>
-                    <p>Are you sure you want to delete this todo?</p>
+            <ModalContainer opened={confirmDelete} onClose={closeConfirmDelete} title="Delete to-do">
+                <div className="m-auto flex h-fit w-fit flex-col items-center justify-center gap-4 rounded-md bg-[var(--primary-color)] p-2">
+                    <p>Are you sure you want to delete this to-do?</p>
                     <div className="flex w-full justify-center gap-4">
                         <button
                             onClick={() => closeConfirmDelete()}
