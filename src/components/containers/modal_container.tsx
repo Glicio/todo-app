@@ -19,7 +19,7 @@ export default function ModalContainer({
              overlay: "backdrop-blur",
              header: "bg-[var(--primary-color)] ",
              body: "bg-[var(--primary-color)] ",
-            content: "bg-[var(--primary-color)] w-fit border border-[var(--secondary-color)] rounded-b-md"
+            content: "bg-[var(--primary-color)] w-fit border border-[var(--secondary-color)] rounded-b-md m-auto"
         }}>
             {children}
         </Modal>
