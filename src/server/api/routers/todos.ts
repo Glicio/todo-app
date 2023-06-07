@@ -3,9 +3,8 @@ import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { db, prisma } from "~/server/db";
-import type { CategoryResponse, TodoResponse } from "~/utils/db_responses";
 import checkUserInTeam from "~/utils/check_usr_in_team";
-import SimpleUser from "~/utils/simple_user";
+import type SimpleUser from "~/utils/simple_user";
 
 export const todos = createTRPCRouter({
     /**
