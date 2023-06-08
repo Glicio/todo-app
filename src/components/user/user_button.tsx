@@ -1,12 +1,12 @@
-import { signIn, signOut, useSession } from 'next-auth/react';
-import React from 'react';
-import UserProfilePic from './UserProfilePic';
+import { signIn, signOut, useSession } from "next-auth/react";
+import React from "react";
+import UserProfilePic from "./UserProfilePic";
 
 function UserMenu() {
     const { data: session } = useSession();
 
     return (
-        <div className="absolute right-2 top-10 flex w-40 flex-col gap-2 rounded bg-[var(--primary-color)] border border-[var(--tertiary-color)] p-4">
+        <div className="absolute right-2 top-10 flex w-40 flex-col gap-2 rounded border border-[var(--tertiary-color)] bg-[var(--primary-color)] p-4">
             <span>Hi, {session?.user?.name || "User"}</span>
             <div className="border-b border-[var(--tertiary-color)]"></div>
             <button
@@ -50,7 +50,7 @@ export default function UserButton() {
                     setShowMenu(!showMenu);
                 }}
             >
-            <UserProfilePic image={session?.user.image || undefined} />
+                <UserProfilePic image={session?.user.image || undefined} />
             </button>
         </div>
     );

@@ -1,4 +1,4 @@
-import {  useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import React from "react";
 import TeamSelect from "../input/team_select";
 import UserButton from "../user/user_button";

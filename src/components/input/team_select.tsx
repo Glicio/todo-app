@@ -15,8 +15,19 @@ import ErrorIcon from "../icons/erro_icon";
 import SelectColor from "./select_color";
 import TextInput from "./text_input";
 import FormActions from "./form_actions";
+import UserGroup from "../icons/user_group";
+import MenuButton from "./menu_button";
+import AddUserIcon from "../icons/add_user";
 
-type TeamState = Omit<Team, "createdAt" | "updatedAt" | "ownerId" | "id"| "todosCount" | "categoriesCount">;
+type TeamState = Omit<
+    Team,
+    | "createdAt"
+    | "updatedAt"
+    | "ownerId"
+    | "id"
+    | "todosCount"
+    | "categoriesCount"
+>;
 type TeamAction = keyof TeamState | "reset";
 
 const teamInitialState: TeamState = {
@@ -55,7 +66,7 @@ const AddTeam = ({
 
     const createTeamMutation = api.teams.createTeam.useMutation({
         onSuccess: (data) => {
-            if(!data) return;
+            if (!data) return;
             addTeam(data);
             notifications.show({
                 title: "Team created",
@@ -66,23 +77,22 @@ const AddTeam = ({
             close();
         },
         onError: (error) => {
-        if(error.data?.zodError?.fieldErrors?.name){
-            return notifications.show({
-                title: "Error creating team",
-                message: "Team name is too short",
-                color: 'red',
-                autoClose: 3000,
-                icon: <ErrorIcon/>
-                })
-        }
-          notifications.show({ 
+            if (error.data?.zodError?.fieldErrors?.name) {
+                return notifications.show({
+                    title: "Error creating team",
+                    message: "Team name is too short",
+                    color: "red",
+                    autoClose: 3000,
+                    icon: <ErrorIcon />,
+                });
+            }
+            notifications.show({
                 title: "Error creating team",
                 message: error.message,
-                color: 'red',
+                color: "red",
                 autoClose: 3000,
-                icon: <ErrorIcon/>
-                
-            })
+                icon: <ErrorIcon />,
+            });
         },
     });
 
@@ -107,7 +117,7 @@ const AddTeam = ({
         <ModalContainer opened={opened} onClose={close} title="Create team">
             <form
                 onSubmit={(e) => {
-                    e.preventDefault()
+                    e.preventDefault();
                     createTeamMutation.mutate({
                         name: teamState.name,
                         color: teamState.color || "#000000",
@@ -115,10 +125,26 @@ const AddTeam = ({
                 }}
             >
                 <div className="flex flex-grow flex-col justify-center gap-2">
-                    <TextInput label="Team name" value={teamState.name} required onChange={(value) => dispatch({ type: "name", payload: value })} placeholder="Your new team's name" />
-                    <SelectColor color={teamState.color} setColor={(color) => dispatch({ type: "color", payload: color })} />
-                    <FormActions onCancel={close} loading={createTeamMutation.isLoading}/>
-               </div>
+                    <TextInput
+                        label="Team name"
+                        value={teamState.name}
+                        required
+                        onChange={(value) =>
+                            dispatch({ type: "name", payload: value })
+                        }
+                        placeholder="Your new team's name"
+                    />
+                    <SelectColor
+                        color={teamState.color}
+                        setColor={(color) =>
+                            dispatch({ type: "color", payload: color })
+                        }
+                    />
+                    <FormActions
+                        onCancel={close}
+                        loading={createTeamMutation.isLoading}
+                    />
+                </div>
             </form>
         </ModalContainer>
     );
@@ -150,7 +176,7 @@ const SelectButton = ({
 };
 
 export default function TeamSelect() {
-    const { agent, setAgent } = React.useContext(userContext);
+    const { agent, setAgent, agentType } = React.useContext(userContext);
     const { data: session } = useSession();
     const [showMenu, setShowMenu] = React.useState(false);
     const [addMenuOpened, { open: openAddMenu, close: closeAddMenu }] =
@@ -158,7 +184,7 @@ export default function TeamSelect() {
 
     const ref = React.useRef<HTMLDivElement>(null);
 
-    const {teams: userTeams, setTeams} = React.useContext(userContext);
+    const { teams: userTeams, setTeams } = React.useContext(userContext);
     React.useEffect(() => {
         const listener = (e: MouseEvent) => {
             if (
@@ -185,9 +211,7 @@ export default function TeamSelect() {
                 opened={addMenuOpened}
                 onClose={closeAddMenu}
                 addTeam={(newTeam) => {
-                    setTeams(old => 
-                        [...old, newTeam]
-                    )
+                    setTeams((old) => [...old, newTeam]);
                 }}
             />
             <div className="relative max-w-[50%] " ref={ref}>
@@ -206,7 +230,7 @@ export default function TeamSelect() {
                             />
                         ) : (
                             <div
-                                className="flex h-8 w-8 border border-[var(--tertiary-color)] rounded-full"
+                                className="flex h-8 w-8 rounded-full border border-[var(--tertiary-color)]"
                                 style={{
                                     backgroundColor: agent.color || "#000000",
                                 }}
@@ -222,12 +246,21 @@ export default function TeamSelect() {
                 {showMenu && (
                     <div className="absolute left-0 top-12 max-h-[calc(100vh-7.5rem)] w-[12rem] overflow-y-auto rounded-md border border-[var(--tertiary-color)] bg-[var(--primary-color)]">
                         <div className="flex flex-col gap-2 p-2">
+                            {agentType === "team" && (
+                                <div>
+                                    <span className="text-sm font-thin">
+                                        Manage Team
+                                        <MenuButton icon={<UserGroup/>} title="Manage Team" onClick={() => console.log("team")} />
+                                        <MenuButton icon={<AddUserIcon/>} title="Invite User" onClick={() => console.log("user")} />
+                                    </span>
+                                </div>
+                            )}
                             <span className="text-sm font-thin">
                                 Personal account
                             </span>
                             <SelectButton
                                 onClick={() => {
-                                    setShowMenu(false)
+                                    setShowMenu(false);
                                     setAgent("user", {
                                         id: session?.user.id || "",
                                         name: session?.user.name || "User",
