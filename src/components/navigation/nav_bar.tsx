@@ -1,61 +1,9 @@
-import { signIn, signOut, useSession } from "next-auth/react";
+import {  useSession } from "next-auth/react";
 import React from "react";
 import TeamSelect from "../input/team_select";
-import UserProfilePic from "../user/UserProfilePic";
+import UserButton from "../user/user_button";
 
-const UserMenu = () => {
-    const { data: session } = useSession();
 
-    return (
-        <div className="absolute right-2 top-10 flex w-40 flex-col gap-2 rounded bg-[var(--primary-color)] border border-[var(--tertiary-color)] p-4">
-            <span>Hi, {session?.user?.name || "User"}</span>
-            <div className="border-b border-[var(--tertiary-color)]"></div>
-            <button
-                className="secondary-button"
-                onClick={() => {
-                    void signOut();
-                }}
-            >
-                Logout
-            </button>
-        </div>
-    );
-};
-
-const UserButton = () => {
-    const { data: session } = useSession();
-    const [showMenu, setShowMenu] = React.useState(false);
-
-    const ref = React.useRef<HTMLDivElement>(null);
-
-    React.useEffect(() => {
-        const listener = (e: MouseEvent) => {
-            if (ref.current && !ref.current.contains(e.target as Node)) {
-                setShowMenu(false);
-            }
-        };
-        document.addEventListener("click", listener);
-        return () => {
-            document.removeEventListener("click", listener);
-        };
-    }, []);
-
-    return (
-        <div className="relative flex items-center" ref={ref}>
-            {showMenu && <UserMenu />}
-            <button
-                onClick={() => {
-                    if (!session?.user) {
-                        return void signIn();
-                    }
-                    setShowMenu(!showMenu);
-                }}
-            >
-            <UserProfilePic image={session?.user.image || undefined} />
-            </button>
-        </div>
-    );
-};
 
 export default function NavBar() {
     const {data: session} = useSession()
@@ -66,7 +14,7 @@ export default function NavBar() {
                 <span className="font-bold text-[var(--secondary-color)] mr-2">JET</span>
                 {session?.user ? <TeamSelect /> : null}
                 <div className="ml-auto">
-                    <UserButton />
+                    <UserButton/>
                 </div>
         </div>
         </>
