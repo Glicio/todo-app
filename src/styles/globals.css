@@ -13,7 +13,9 @@
     --yellow-400: rgb(250 204 21);
     --green-400: rgb(74 222 128);
 }
-
+.form-item{
+    @apply flex flex-col;
+}
 .primary-text-input{
     @apply border rounded-md bg-white text-black p-2;
 }
