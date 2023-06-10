@@ -2,6 +2,7 @@ import { useSession } from "next-auth/react";
 import React from "react";
 import TeamSelect from "../input/team_select";
 import UserButton from "../user/user_button";
+import Link from "next/link";
 
 
 
@@ -11,7 +12,7 @@ export default function NavBar() {
     <>
         <div className="h-12 w-full"></div>
         <div className="fixed z-20 bg-[var(--primary-color)] top-0 left-0 bg-primary flex h-12 w-full items-center border-b border-[var(--tertiary-color)] px-2 py-4">
-                <span className="font-bold text-[var(--secondary-color)] mr-2">JET</span>
+                <Link className="font-bold text-[var(--secondary-color)] mr-2" href={"/"}>JET</Link>
                 {session?.user ? <TeamSelect /> : null}
                 <div className="ml-auto">
                     <UserButton/>
