@@ -163,7 +163,7 @@ const SelectButton = ({
     onClick: () => void;
 }) => {
     return (
-        <button className="flex w-full items-center gap-2" onClick={onClick}>
+        <button className="flex w-full items-center gap-2 whitespace-nowrap" onClick={onClick}>
             {imageUrl && <UserProfilePic image={imageUrl} />}
             {!imageUrl && color ? (
                 <div
@@ -171,7 +171,9 @@ const SelectButton = ({
                     style={{ backgroundColor: color }}
                 ></div>
             ) : null}
-            {name}
+            <span className="max-w-[70%] overflow-hidden text-ellipsis">
+                {name}
+            </span>
         </button>
     );
 };
