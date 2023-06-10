@@ -16,7 +16,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
     Component,
     pageProps: { session, ...pageProps },
 }) => {
-    useEffect(() => {      
+    useEffect(() => {
         if ("serviceWorker" in navigator) {
             void navigator.serviceWorker.register("/sw.js");
         }
@@ -28,40 +28,40 @@ const MyApp: AppType<{ session: Session | null }> = ({
 
     return (
         <>
-        <Head>
-        <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0"
-        />
-        <meta property="og:title" content="Just Enough To-do" />
-        <meta property="og:description" content="A simple to-do app with teams support." />
-        <meta property="og:url" content="https://todo.glicio.dev/" />
-        <meta property="og:site_name" content="JET" />
-        <link
-            rel="manifest"
-            href={"/site.webmanifest"}
-        />
-    <title>Just Enough To-do</title>
-    </Head>
-        <SessionProvider session={session}>
-            <MantineProvider withGlobalStyles withNormalizeCSS 
-                theme={{ 
-                    colorScheme: 'dark',
+            <Head>
+                <meta
+                    name="viewport"
+                    content="width=device-width, initial-scale=1.0"
+                />
+                <meta property="og:title" content="Just Enough To-do" />
+                <meta property="og:description" content="A simple to-do app with teams support." />
+                <meta property="og:url" content="https://todo.glicio.dev/" />
+                <meta property="og:site_name" content="JET" />
+                <link
+                    rel="manifest"
+                    href={"/site.webmanifest"}
+                />
+                <title>Just Enough To-do</title>
+            </Head>
+            <SessionProvider session={session}>
+                <MantineProvider withGlobalStyles withNormalizeCSS
+                    theme={{
+                        colorScheme: 'dark',
                         colors: {
-                                'secondary-color': ['#502FAC', '#ff0000'],
+                            'secondary-color': ['#502FAC', '#ff0000'],
                         }
 
-                }}
+                    }}
 
                 >
-                <Notifications />
-                <UserProvider>
-                    <TodoProvider>
-                    <Component {...pageProps} />
-                    </TodoProvider>
-                </UserProvider>
-            </MantineProvider>
-        </SessionProvider>
+                    <Notifications />
+                    <UserProvider>
+                        <TodoProvider>
+                            <Component {...pageProps} />
+                        </TodoProvider>
+                    </UserProvider>
+                </MantineProvider>
+            </SessionProvider>
         </>
     );
 };
