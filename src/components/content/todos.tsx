@@ -76,8 +76,8 @@ export default function Todos({done}: {done: boolean}) {
                 {categories && categories.length > 0 ? (
                     <>
                         <div className="w-full h-20 "></div>
-                        <div className="h-20 overflow-hidden fixed w-full backdrop-blur p-2">
-                            <div className="relative">
+                        <div className="h-fit overflow-hidden fixed w-full backdrop-blur border-b border-[var(--tertiary-color)]">
+                            <div className="relative px-2">
                                 <div className="flex items-center gap-1">
                                     <span>Categories</span>
                                     {selectedCategory.length > 0 ? (
@@ -91,7 +91,6 @@ export default function Todos({done}: {done: boolean}) {
                                         </button>
                                     ) : null}
                                 </div>
-                            
                                 <div className="thin-scroll flex gap-2 overflow-auto pb-2 pt-1 ">
                                     {categoriesList &&
                                         categoriesList.map((category) => (
@@ -123,7 +122,7 @@ export default function Todos({done}: {done: boolean}) {
                                         ))}
                                 </div>
                             </div>
-                            <div className="my-2 border-b border-[var(--tertiary-color)]"></div>{" "}
+                            <div className=""></div>{" "}
                         </div>
                     </>
                 ) : null}
