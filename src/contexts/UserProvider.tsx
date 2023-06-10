@@ -10,6 +10,7 @@ interface Agent {
     name?: string | null;
     image?: string | null;
     color?: string | null;
+    ownerId?: string | null;
 }
 
 const agentInitialState: Agent = {
