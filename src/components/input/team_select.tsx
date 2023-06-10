@@ -5,7 +5,6 @@ import UserProfilePic from "../user/UserProfilePic";
 import AddIcon from "../icons/add";
 import { useDisclosure } from "@mantine/hooks";
 import ModalContainer from "../containers/modal_container";
-import DefaultForm from "../forms/default_form";
 import type { Team } from "@prisma/client";
 import { api } from "~/utils/api";
 import { userContext } from "~/contexts/UserProvider";
@@ -288,6 +287,7 @@ export default function TeamSelect() {
                                                 name: team.name,
                                                 color: team.color,
                                                 image: team.image,
+                                                ownerId: team.ownerId,
                                             });
                                             setShowMenu(false);
                                         }}
