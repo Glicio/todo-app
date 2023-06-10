@@ -18,6 +18,7 @@ import FormActions from "./form_actions";
 import UserGroup from "../icons/user_group";
 import MenuButton from "./menu_button";
 import AddUserIcon from "../icons/add_user";
+import { useRouter } from "next/router";
 
 type TeamState = Omit<
     Team,
@@ -181,7 +182,7 @@ export default function TeamSelect() {
     const [showMenu, setShowMenu] = React.useState(false);
     const [addMenuOpened, { open: openAddMenu, close: closeAddMenu }] =
         useDisclosure();
-
+    const router = useRouter();
     const ref = React.useRef<HTMLDivElement>(null);
 
     const { teams: userTeams, setTeams } = React.useContext(userContext);
@@ -250,8 +251,8 @@ export default function TeamSelect() {
                                 <div>
                                     <span className="text-sm font-thin">
                                         Manage Team
-                                        <MenuButton icon={<UserGroup/>} title="Manage Team" onClick={() => console.log("team")} />
-                                        <MenuButton icon={<AddUserIcon/>} title="Invite User" onClick={() => console.log("user")} />
+                                        <MenuButton icon={<UserGroup/>} title="Manage Team" onClick={() => void router.push("/team")} />
+                                        <MenuButton icon={<AddUserIcon/>} title="Invite User" onClick={() => void router.push("/team/add")} />
                                     </span>
                                 </div>
                             )}

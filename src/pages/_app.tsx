@@ -41,9 +41,19 @@ const MyApp: AppType<{ session: Session | null }> = ({
             rel="manifest"
             href={"/site.webmanifest"}
         />
+    <title>Just Enough To-do</title>
     </Head>
         <SessionProvider session={session}>
-            <MantineProvider withGlobalStyles withNormalizeCSS theme={{ colorScheme: 'dark'}}>
+            <MantineProvider withGlobalStyles withNormalizeCSS 
+                theme={{ 
+                    colorScheme: 'dark',
+                        colors: {
+                                'secondary-color': ['#502FAC', '#ff0000'],
+                        }
+
+                }}
+
+                >
                 <Notifications />
                 <UserProvider>
                     <TodoProvider>
