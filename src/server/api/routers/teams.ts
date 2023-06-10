@@ -110,7 +110,14 @@ export const teams = createTRPCRouter({
                     id: input.teamId,
                 },
                 include: {
-                    users: true,
+                    users: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            image: true,
+                        }
+                    },
                 },
             });
             if (!team) {
@@ -145,7 +152,7 @@ export const teams = createTRPCRouter({
                     ownerId: true,
                 },
             });
-            
+
             if (!oldTeam || oldTeam.ownerId !== ctx.session.user.id) {
                 throw new TRPCError({
                     code: "BAD_REQUEST",
