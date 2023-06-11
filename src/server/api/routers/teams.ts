@@ -181,7 +181,7 @@ export const teams = createTRPCRouter({
     /**
      * creates a invitation for a given team
      * */
-    
+
     createInvitation: protectedProcedure.input(
         z.object({
             teamId: z.string(),
@@ -202,7 +202,7 @@ export const teams = createTRPCRouter({
                 ownerId: true,
             },
         });
-        
+
         if (!team || team.ownerId !== ctx.session.user.id) {
             throw new TRPCError({
                 code: "BAD_REQUEST",
@@ -235,10 +235,21 @@ export const teams = createTRPCRouter({
                     accepted: false,
                 },
             });
-            return invitations[0];
+            if (invitations.length > 0) {
+                if(!invitations[0]?.id) {
+                    throw new TRPCError({
+                        code: "INTERNAL_SERVER_ERROR",
+                        message: "Error while creating invitation",
+                    });
+                }
+                return {
+                    invitationId: invitations[0].id,
+                    invitationLink: `/join-team/${invitations[0].id}`,
+                }
+            }
         }
-                        
-                        
+
+
         const invitation = await prisma.teamInvitation.create({
             data: {
                 team: {
@@ -256,7 +267,15 @@ export const teams = createTRPCRouter({
                 email: input.email || null,
             },
         });
-        return invitation;
+        if (input.email) {
+            console.log("sending email");
+            return "email sent"
+        }
+
+        return {
+            invitationId: invitation.id,
+            invitationLink: `/join-team/${invitation.id}`,
+        };
     }
     ),
     /**
