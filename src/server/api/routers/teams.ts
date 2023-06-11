@@ -3,6 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { z } from "zod";
 import { prisma } from "~/server/db";
 import checkUserInTeam from "~/utils/check_usr_in_team";
+import { getBaseUrl } from "~/utils/api";
 
 
 
@@ -187,7 +188,10 @@ export const teams = createTRPCRouter({
             teamId: z.string(),
             email: z.string().email().optional(),
         })
-    ).mutation(async ({ input, ctx }) => {
+    ).mutation(async ({ input, ctx }): Promise<{
+        invitationId: string,
+        invitationLink: string,
+        type: "email" | "link"}> => {
         if (!await checkUserInTeam({ userId: ctx.session.user.id, teamId: input.teamId })) {
             throw new TRPCError({
                 code: "BAD_REQUEST",
@@ -244,7 +248,8 @@ export const teams = createTRPCRouter({
                 }
                 return {
                     invitationId: invitations[0].id,
-                    invitationLink: `/join-team/${invitations[0].id}`,
+                    invitationLink: `${getBaseUrl()}/join-team/${invitations[0].id}`,
+                    type: "link",
                 }
             }
         }
@@ -269,12 +274,17 @@ export const teams = createTRPCRouter({
         });
         if (input.email) {
             console.log("sending email");
-            return "email sent"
+            return {
+                invitationId: invitation.id,
+                invitationLink: `${getBaseUrl()}/join-team/${invitation.id}`,
+                type: "email",
+                }
         }
 
         return {
             invitationId: invitation.id,
-            invitationLink: `/join-team/${invitation.id}`,
+            invitationLink: `${getBaseUrl()}/join-team/${invitation.id}`,
+            type: "link",
         };
     }
     ),
