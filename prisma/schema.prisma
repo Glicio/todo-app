@@ -2,13 +2,13 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mysql"
-  url = env("DATABASE_URL")
-  relationMode = "prisma"
+    provider     = "mysql"
+    url          = env("DATABASE_URL")
+    relationMode = "prisma"
 }
 
 model Account {
@@ -17,79 +17,97 @@ model Account {
     type              String
     provider          String
     providerAccountId String
-    refresh_token     String?  @db.Text
-    access_token      String?  @db.Text
+    refresh_token     String? @db.Text
+    access_token      String? @db.Text
     expires_at        Int?
     token_type        String?
     scope             String?
-    id_token          String?  @db.Text
+    id_token          String? @db.Text
     session_state     String?
     user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@index([userId])
     @@unique([provider, providerAccountId])
+    @@index([userId])
 }
-model Team {
-    id        String   @id @default(cuid())
-    name      String
-    //counters
-    todosCount Int      @default(0)
-    categoriesCount Int @default(0)
-    //timestamps
-    createdAt DateTime @default(now())
-    updatedAt DateTime? 
-    image  String?
-    color  String?
-    owner     User     @relation(name: "teamsCreated" ,fields: [ownerId], references: [id], onDelete: Cascade)
-    ownerId   String
-    todos     Todo[]
-    categories    Category[]
-    users     User[]
 
+model Team {
+    id              String     @id @default(cuid())
+    name            String
+    //counters
+    todosCount      Int        @default(0)
+    categoriesCount Int        @default(0)
+    //timestamps
+    createdAt       DateTime   @default(now())
+    updatedAt       DateTime?
+    image           String?
+    color           String?
+    owner           User       @relation(name: "teamsCreated", fields: [ownerId], references: [id], onDelete: Cascade)
+    ownerId         String
+    todos           Todo[]
+    categories      Category[]
+    users           User[]
+
+    TeamInvitation TeamInvitation[] @relation("Invites")
 
     @@index([ownerId])
-
 }
+
+model TeamInvitation {
+    id          String    @id @default(cuid())
+    email       String?
+    teamId      String
+    team        Team      @relation("Invites", fields: [teamId], references: [id], onDelete: Cascade)
+    accepted    Boolean   @default(false)
+    invitedBy   User      @relation("invitationsCreated", fields: [invitedById], references: [id], onDelete: Cascade)
+    invitedById String
+    acceptedAt  DateTime?
+    createdAt   DateTime  @default(now())
+    expiresAt   DateTime?
+
+    @@index([teamId])
+    @@index([invitedById])
+}
+
 model Session {
     id           String   @id @default(cuid())
     sessionToken String   @unique
     userId       String
     expires      DateTime
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-    
+
     @@index([userId])
 }
 
 model Todo {
-    id          String   @id @default(cuid())
+    id          String    @id @default(cuid())
     //content
     title       String
-    description String? @db.Text
-    done        Boolean  @default(false)
+    description String?   @db.Text
+    done        Boolean   @default(false)
     dueDate     DateTime?
     //timestamps
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime? 
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime?
     doneAt      DateTime?
     //relationships
     //todos can be owned by a user or a team
     user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
     userId      String?
     //but is always created by a user
-    createdBy   User     @relation("todoCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+    createdBy   User      @relation("todoCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
     createdById String
-    updatedBy   User?    @relation("todoUpdatedBy", fields: [updatedById], references: [id], onDelete: Cascade)
+    updatedBy   User?     @relation("todoUpdatedBy", fields: [updatedById], references: [id], onDelete: Cascade)
     updatedById String?
-    doneBy      User?    @relation("todoDoneBy", fields: [doneById], references: [id], onDelete: Cascade)
+    doneBy      User?     @relation("todoDoneBy", fields: [doneById], references: [id], onDelete: Cascade)
     doneById    String?
 
-    categoryId  String?
-    category    Category? @relation(fields: [categoryId], references: [id])
+    categoryId String?
+    category   Category? @relation(fields: [categoryId], references: [id])
 
-    teamId      String?
-    team        Team?    @relation(fields: [teamId], references: [id])
+    teamId String?
+    team   Team?   @relation(fields: [teamId], references: [id])
 
-    assignedTo  User?    @relation("todosAssigned",fields: [assignedToId], references: [id], onDelete: Cascade)
+    assignedTo   User?   @relation("todosAssigned", fields: [assignedToId], references: [id], onDelete: Cascade)
     assignedToId String?
 
     //indexes
@@ -103,17 +121,17 @@ model Todo {
 }
 
 model Category {
-    id          String   @id @default(cuid())
+    id          String    @id @default(cuid())
     name        String
     description String?
     color       String?
     //timestamps
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime? 
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime?
     //relationships
-    createdBy   User     @relation("categoriesCreated",fields: [createdById], references: [id], onDelete: Cascade)
+    createdBy   User      @relation("categoriesCreated", fields: [createdById], references: [id], onDelete: Cascade)
     createdById String
-    updatedBy   User?    @relation("categoriesUpdated",fields: [updatedById], references: [id], onDelete: Cascade)
+    updatedBy   User?     @relation("categoriesUpdated", fields: [updatedById], references: [id], onDelete: Cascade)
     updatedById String?
     team        Team?     @relation(fields: [teamId], references: [id], onDelete: Cascade)
     teamId      String?
@@ -128,36 +146,35 @@ model Category {
     @@index([userId])
 }
 
-
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
+    id                     String    @id @default(cuid())
+    name                   String?
+    email                  String?   @unique
+    emailVerified          DateTime?
+    image                  String?
     //counters
-    todosCreatedCount    Int       @default(0)
-    teamsCreatedCount    Int       @default(0)
-    categoriesCreatedCount Int     @default(0)
-
+    todosCreatedCount      Int       @default(0)
+    teamsCreatedCount      Int       @default(0)
+    categoriesCreatedCount Int       @default(0)
 
     //relationships
-    teams         Team[]
-    teamsCreated  Team[]    @relation("teamsCreated")
+    teams        Team[]
+    teamsCreated Team[] @relation("teamsCreated")
 
-    accounts      Account[]
-    sessions      Session[]
+    accounts Account[]
+    sessions Session[]
 
     categoriesCreated Category[] @relation("categoriesCreated")
     categoriesUpdated Category[] @relation("categoriesUpdated")
-    categories    Category[]
+    categories        Category[]
 
     todos         Todo[]
-    todosDone     Todo[]    @relation("todoDoneBy")
-    todosCreated  Todo[]    @relation("todoCreatedBy")
-    todosUpdated  Todo[]    @relation("todoUpdatedBy")
-    todosAssigned Todo[]    @relation("todosAssigned")
+    todosDone     Todo[] @relation("todoDoneBy")
+    todosCreated  Todo[] @relation("todoCreatedBy")
+    todosUpdated  Todo[] @relation("todoUpdatedBy")
+    todosAssigned Todo[] @relation("todosAssigned")
 
+    TeamInvitation TeamInvitation[] @relation("invitationsCreated")
 }
 
 model VerificationToken {
