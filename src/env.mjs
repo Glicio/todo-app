@@ -32,6 +32,8 @@ const server = z.object({
     DATABASE_PASSWORD: z.string(),
     //General
     BASE_URL: z.string(),
+    //SendGrid
+    SENDGRID_API_KEY: z.string(),
 });
 
 /**
@@ -65,6 +67,8 @@ const processEnv = {
     DATABASE_PASSWORD: process.env.DATABASE_PASSWORD,
     //General
     BASE_URL: process.env.BASE_URL,
+    //SendGrid
+    SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
 };
 
 // Don't touch the part below
