@@ -178,4 +178,227 @@ export const teams = createTRPCRouter({
             return team;
         }
         ),
+    /**
+     * creates a invitation for a given team
+     * */
+    
+    createInvitation: protectedProcedure.input(
+        z.object({
+            teamId: z.string(),
+            email: z.string().email().optional(),
+        })
+    ).mutation(async ({ input, ctx }) => {
+        if (!await checkUserInTeam({ userId: ctx.session.user.id, teamId: input.teamId })) {
+            throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "You are not in this team",
+            });
+        }
+        const team = await prisma.team.findUnique({
+            where: {
+                id: input.teamId
+            },
+            select: {
+                ownerId: true,
+            },
+        });
+        
+        if (!team || team.ownerId !== ctx.session.user.id) {
+            throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "You don't have permission to invite users to this team",
+            });
+        }
+
+        if (input.email) {
+            const teamUsers = await prisma.team.count({
+                where: {
+                    id: input.teamId,
+                    users: {
+                        some: {
+                            email: input.email,
+                        }
+                    }
+                },
+            });
+            if (teamUsers > 0) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "User already in team",
+                });
+            }
+        } else {
+            const invitations = await prisma.teamInvitation.findMany({
+                where: {
+                    teamId: input.teamId,
+                    email: null,
+                    accepted: false,
+                },
+            });
+            return invitations[0];
+        }
+                        
+                        
+        const invitation = await prisma.teamInvitation.create({
+            data: {
+                team: {
+                    connect: {
+                        id: input.teamId,
+                    }
+                },
+                invitedBy: {
+                    connect: {
+                        id: ctx.session.user.id,
+                    }
+                },
+                //expires in 24 hours
+                expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+                email: input.email || null,
+            },
+        });
+        return invitation;
+    }
+    ),
+    /**
+     * returns the list of invitations for a given team
+     * */
+    getTeamInvitations: protectedProcedure.input(
+        z.object({
+            teamId: z.string(),
+        })).query(async ({ input, ctx }) => {
+            if (!await checkUserInTeam({ userId: ctx.session.user.id, teamId: input.teamId })) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "You are not in this team",
+                });
+            }
+            const invitations = await prisma.teamInvitation.findMany({
+                where: {
+                    teamId: input.teamId,
+                },
+            });
+            return invitations;
+        }),
+    /**
+     * deletes a invitation for a given team
+     * */
+    deleteInvitation: protectedProcedure.input(
+        z.object({
+            invitationId: z.string(),
+        })).mutation(async ({ input, ctx }) => {
+            const invitation = await prisma.teamInvitation.findUnique({
+                where: {
+                    id: input.invitationId,
+                },
+                select: {
+                    team: {
+                        select: {
+                            ownerId: true,
+                        }
+                    }
+                }
+            });
+            if (!invitation) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "Invitation not found",
+                });
+            }
+            if (invitation.team.ownerId !== ctx.session.user.id) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "You don't have permission to delete this invitation",
+                });
+            }
+            const deletedInvitation = await prisma.teamInvitation.delete({
+                where: {
+                    id: input.invitationId,
+                },
+            });
+            return deletedInvitation;
+        }),
+    /**
+     * add a user to a team through a invitation
+     * */
+    acceptInvitation: protectedProcedure.input(
+        z.object({
+            invitationId: z.string(),
+        })).mutation(async ({ input, ctx }) => {
+            const invitation = await prisma.teamInvitation.findUnique({
+                where: {
+                    id: input.invitationId,
+                },
+                select: {
+                    team: {
+                        select: {
+                            id: true,
+                            ownerId: true,
+                        }
+                    },
+                    email: true,
+
+                }
+            });
+            if (!invitation) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "Invitation not found",
+                });
+            }
+            if (invitation.email && (!ctx.session.user.email || invitation.email !== ctx.session.user.email)) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "You don't have permission to accept this invitation",
+                });
+            }
+            const team = await prisma.team.findUnique({
+                where: {
+                    id: invitation.team.id,
+                },
+                include: {
+                    users: {
+                        select: {
+                            id: true,
+                        }
+                    }
+                }
+            });
+            if (!team) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "Team not found",
+                });
+            }
+            const userInTeam = team.users.find((user) => user.id === ctx.session.user.id);
+            if (userInTeam) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "You are already in this team",
+                });
+            }
+            const updatedTeam = await prisma.team.update({
+                where: {
+                    id: invitation.team.id,
+                },
+                data: {
+                    users: {
+                        connect: {
+                            id: ctx.session.user.id,
+                        }
+                    }
+                },
+            });
+            if (!updatedTeam) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "Team not found",
+                });
+            }
+            await prisma.teamInvitation.delete({
+                where: {
+                    id: input.invitationId,
+                },
+            });
+            return updatedTeam;
+        }),
 });
