@@ -12,6 +12,7 @@
     --red-400: rgb(248 113 113);
     --yellow-400: rgb(250 204 21);
     --green-400: rgb(74 222 128);
+    --disabled-color: rgb(209,213,219);
 }
 .form-item{
     @apply flex flex-col;
