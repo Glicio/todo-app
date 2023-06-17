@@ -56,7 +56,7 @@ export default function Todos({done}: {done: boolean}) {
 
     if (isLoading)
         return (
-            <div className="flex h-screen items-center justify-center">
+            <div className="flex items-center my-32 justify-center">
                 <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-gray-900"></div>
             </div>
         );
@@ -72,7 +72,7 @@ export default function Todos({done}: {done: boolean}) {
             {!showAddTodo && !done && (
                 <AddBtn onClick={() => setShowAddTodo(true)} />
             )}
-            <div className="flex flex-col gap-2 flex-wrap">
+            <div className="flex flex-col gap-2 flex-wrap px-2 py-4">
                 {categories && categories.length > 0 ? (
                     <>
                         <div className="w-full h-20 "></div>
