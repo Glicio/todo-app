@@ -145,7 +145,7 @@ export const todos = createTRPCRouter({
                 categoryId: z.string().optional(),
                 agentType: z.enum(["user", "team"]),
                 agentId: z.string(),
-                assignedUserId: z.string().optional(),
+                assignedUsersIds: z.array(z.string()).optional(),
             })
         )
         .mutation(async ({ ctx, input }) => {
@@ -156,7 +156,7 @@ export const todos = createTRPCRouter({
                 categoryId,
                 agentType,
                 agentId,
-                assignedUserId,
+                assignedUsersIds,
             } = input;
             if (!ctx.session.user)
                 throw new TRPCError({ code: "UNAUTHORIZED" });
@@ -237,8 +237,8 @@ export const todos = createTRPCRouter({
                             agentType === "team"
                                 ? { connect: { id: agentId } }
                                 : undefined,
-                        assignedTo: assignedUserId
-                            ? { connect: { id: assignedUserId } }
+                        assignedTo: assignedUsersIds
+                            ? { connect: assignedUsersIds.map(curr => ({ id: curr })) }
                             : undefined,
                     },
                     include: {
@@ -491,10 +491,10 @@ export const todos = createTRPCRouter({
                 agentType: z.enum(["user", "team"]),
                 agentId: z.string(),
                 title: z.string(),
-                dueDate: z.date().optional(),
-                description: z.string(),
+                dueDate: z.date().optional().nullable(),
+                description: z.string().optional().nullable(),
                 categoryId: z.string().nullable(),
-                assignedUserId: z.string().nullable(),
+                assignedUsersIds: z.array(z.string()).optional().nullable(),
             })
         )
         .mutation(async ({ ctx, input }) => {
@@ -566,15 +566,45 @@ export const todos = createTRPCRouter({
                               }
                             : { disconnect: true },
 
-                        assignedTo: input.assignedUserId
+                        assignedTo: input.assignedUsersIds
                             ? {
-                                connect: {
-                                    id: input.assignedUserId,
-                                },
+                                set: [],
+                                connect: input.assignedUsersIds.map((id) => ({
+                                    id,
+                                })),
                             }
-                            : { disconnect: true },
+                            : { set: [] },
+                                
+                        },
+                    include: {
+                        createdBy: {
+                            select: {
+                                name: true,
+                                id: true,
+                            },
+                        },
+                        updatedBy: {
+                            select: {
+                                name: true,
+                                id: true,
+                            },
+                        },
+                        assignedTo: {
+                            select: {
+                                name: true,
+                                id: true,
+                            },
+                        },
+                        category: {
+                            select: {
+                                name: true,
+                                id: true,
+                                color: true,
+                            },
+                        },
                     },
-                });
+                    },
+                );
                 const user = await prisma.user.findUnique({
                     where: { id: ctx.session.user.id },
                 });
