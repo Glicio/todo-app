@@ -6,5 +6,5 @@ export default interface SimpleTodo extends Todo {
     category:  SimpleCategory | null | undefined;
     createdBy: SimpleUser, 
     updatedBy: SimpleUser | null;
-    assignedTo: SimpleUser | null;
+    assignedTo: SimpleUser[] | null;
 }
