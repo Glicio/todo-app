@@ -6,6 +6,7 @@ import {
 } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
 import GoogleProvider from "next-auth/providers/google";
+import EmailProvider from "next-auth/providers/email";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { env } from "~/env.mjs";
 import { prisma } from "~/server/db";
@@ -55,6 +56,39 @@ export const authOptions: NextAuthOptions = {
         DiscordProvider({
             clientId: env.DISCORD_CLIENT_ID,
             clientSecret: env.DISCORD_CLIENT_SECRET,
+        }),
+        EmailProvider({
+            sendVerificationRequest: async ({ identifier: email, url }) => {
+                console.log("Sending email to " + email);
+                console.log("Verification URL: " + url);
+                try {
+                    await fetch("https://api.sendgrid.com/v3/mail/send", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${process.env.SENDGRID_API_KEY || ""}`,
+                        },
+                        body: JSON.stringify({
+                            from: {
+                                name: "Glicio",
+                                email: "noreply@glicio.dev",
+                            },
+                            personalizations: [
+                                {
+                                    to: [{ email: email }],
+                                    dynamic_template_data: {
+                                        magicLink: url,
+                                    },
+                                },
+                            ],
+                            template_id: process.env.LOGIN_TEMPLATE_ID || "",
+                        })
+                    });
+                } catch (e) {
+                    console.error(e);
+                    throw new Error("Failed to send email to " + email);
+                }
+            },
         }),
         /**
          * ...add more providers here.
