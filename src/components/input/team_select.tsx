@@ -248,15 +248,6 @@ export default function TeamSelect() {
                 {showMenu && (
                     <div className="absolute left-0 top-12 max-h-[calc(100vh-7.5rem)] w-[12rem] overflow-y-auto rounded-md border border-[var(--tertiary-color)] bg-[var(--primary-color)]">
                         <div className="flex flex-col gap-2 p-2">
-                            {agentType === "team" && (
-                                <div>
-                                    <span className="text-sm font-thin">
-                                        Manage Team
-                                        <MenuButton icon={<UserGroup/>} title="Manage Team" onClick={() => void router.push("/team")} />
-                                        <MenuButton icon={<AddUserIcon/>} title="Invite User" onClick={() => void router.push("/team/add")} />
-                                    </span>
-                                </div>
-                            )}
                             <span className="text-sm font-thin">
                                 Personal account
                             </span>
