@@ -6,21 +6,24 @@ export default function ModalContainer({
     onClose,
     children,
     title,
+    keepMounted,
 }: {
     opened: boolean;
     onClose: () => void;
     children: React.ReactNode;
     title?: string;
+    keepMounted?: boolean;
 }) {
     return (
-        <Modal opened={opened} onClose={onClose} 
-        title={title}
-        classNames={{
-             overlay: "backdrop-blur",
-             header: "bg-[var(--primary-color)] ",
-             body: "bg-[var(--primary-color)] ",
-            content: "bg-[var(--primary-color)] w-fit border border-[var(--secondary-color)] rounded-b-md m-auto"
-        }}>
+        <Modal opened={opened} onClose={onClose}
+            title={title}
+            keepMounted={keepMounted}
+            classNames={{
+                overlay: "backdrop-blur",
+                header: "bg-[var(--primary-color)] ",
+                body: "bg-[var(--primary-color)] ",
+                content: "bg-[var(--primary-color)] w-fit border border-[var(--secondary-color)] rounded-b-md m-auto"
+            }}>
             {children}
         </Modal>
     );
