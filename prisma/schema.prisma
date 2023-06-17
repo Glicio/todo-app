@@ -107,12 +107,10 @@ model Todo {
     teamId String?
     team   Team?   @relation(fields: [teamId], references: [id])
 
-    assignedTo   User?   @relation("todosAssigned", fields: [assignedToId], references: [id], onDelete: Cascade)
-    assignedToId String?
+    assignedTo User[]  @relation("todosAssigned")
 
     //indexes
     @@index([doneById])
-    @@index([assignedToId])
     @@index([updatedById])
     @@index([createdById])
     @@index([teamId])
