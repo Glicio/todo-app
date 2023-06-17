@@ -34,6 +34,8 @@ const server = z.object({
     BASE_URL: z.string(),
     //SendGrid
     SENDGRID_API_KEY: z.string(),
+    INVITATION_TEMPLATE_ID: z.string(),
+    LOGIN_TEMPLATE_ID: z.string(),
 });
 
 /**
@@ -69,6 +71,8 @@ const processEnv = {
     BASE_URL: process.env.BASE_URL,
     //SendGrid
     SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
+    INVITATION_TEMPLATE_ID: process.env.INVITATION_TEMPLATE_ID,
+    LOGIN_TEMPLATE_ID: process.env.LOGIN_TEMPLATE_ID,
 };
 
 // Don't touch the part below
