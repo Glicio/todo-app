@@ -27,7 +27,7 @@ export default function TodoComponent({
     openEdit,
 }: {
     todo: SimpleTodo;
-    openEdit: (id: string) => void;
+    openEdit: () => void;
     onDelete: (id: string) => void;
     onEdit: (todo: SimpleTodo) => void;
     onDone: (id: string) => void;

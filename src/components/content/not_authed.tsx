@@ -16,7 +16,7 @@ export default function UserNotAuthed() {
             </span> 
         </h1>
         <p className="max-w-[60%] text-gray-300 text-center">
-            Just Enough To-Do is a simple to-do list app that helps you get things done and improves your and your team's productivity.
+            Just Enough To-Do is a simple to-do list app that helps you get things done and improves your and your team{"\'"}s productivity.
         </p>
         <p className="text-gray-400 text-xs">
             Please sign in to continue
