@@ -1,7 +1,6 @@
 import { Tabs } from "@mantine/core";
 import { type NextPage } from "next";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
 import { useContext } from "react";
 import Categories from "~/components/content/categories";
 import UserNotAuthed from "~/components/content/not_authed";
@@ -14,7 +13,6 @@ const Home: NextPage = () => {
 
     const { data: session } = useSession();
     const { agentType } = useContext(userContext)
-    const router = useRouter();
     if (!session || !session.user) {
 
         return (
@@ -30,12 +28,6 @@ const Home: NextPage = () => {
                 <Tabs defaultValue="todos" color="secondary-color.0"
                     classNames={{
                         tabsList: "backdrop-blur",
-                    }}
-                    onTabChange={(value) => {
-                        console.log(value)
-                        if (value === "team") {
-//                            void router.push("/team")
-                        }
                     }}
                 >
                     <div className="relative h-[2.25rem] w-full">
