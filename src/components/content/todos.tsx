@@ -10,29 +10,30 @@ import type SimpleTodo from "~/utils/simple_todo";
 
 
 
-export default function Todos({done}: {done: boolean}) {
+export default function Todos({ done }: { done: boolean }) {
 
 
     const [showAddTodo, setShowAddTodo] = React.useState(false);
     const [selectedCategory, setSelectedCategory] = React.useState<string[]>([]);
-    const {todos, categories, setTodos, isLoading} = React.useContext(TodoContext);
+    const { todos, categories, setTodos, isLoading } = React.useContext(TodoContext);
     const [todosList, setTodosList] = React.useState<SimpleTodo[]>([]);
     const [filteredTodos, setFilteredTodos] = React.useState<SimpleTodo[]>([]);
     const [categoriesList, setCategoriesList] = React.useState<SimpleCategory[]>([]);
+    const [todoToEdit, setTodoToEdit] = React.useState<SimpleTodo | undefined>(undefined);
     const removeTodo = (id: string) => {
         setTodos((old) => {
             return old.filter((todo) => todo.id !== id);
         });
     };
-    
+
     const addTodo = (todo: SimpleTodo) => {
         setTodos((old) => [...old, todo]);
     };
-    
+
     React.useEffect(() => {
-        if(done){
+        if (done) {
             setTodosList(todos.filter(todo => todo.done))
-        }else{
+        } else {
             setTodosList(todos.filter(todo => !todo.done))
         }
     }, [todos, done])
@@ -65,14 +66,29 @@ export default function Todos({done}: {done: boolean}) {
     return (
         <div>
             <AddTodo
-                close={() => setShowAddTodo(false)}
+                close={() => {
+                    setShowAddTodo(false)
+                    setTodoToEdit(undefined)
+                }}
+                onEdit={(todo) => {
+                    setTodos((old) => {
+                        return old.map((oldTodo) => {
+                            if (oldTodo.id === todo.id) {
+                                return todo;
+                            }
+                            return oldTodo;
+                        });
+                    });
+                    setTodoToEdit(undefined)
+                }}
                 opened={showAddTodo}
                 onAdd={(todo) => addTodo(todo)}
+                todoToEdit={todoToEdit}
             />
             {!showAddTodo && !done && (
                 <AddBtn onClick={() => setShowAddTodo(true)} />
             )}
-            <div className="flex flex-col gap-2 flex-wrap px-2 py-4">
+            <div className="flex flex-col gap-2 flex-wrap px-2">
                 {categories && categories.length > 0 ? (
                     <>
                         <div className="w-full h-20 "></div>
@@ -137,6 +153,10 @@ export default function Todos({done}: {done: boolean}) {
                                 <TodoComponent
                                     key={todo.id}
                                     todo={todo}
+                                    openEdit={() => {
+                                        setShowAddTodo(true);
+                                        setTodoToEdit(todo);
+                                    }}
                                     onDelete={(id) => {
                                         removeTodo(id);
                                     }}
@@ -148,7 +168,7 @@ export default function Todos({done}: {done: boolean}) {
                                             return old.map((t) => {
                                                 if (t.id === todo.id) {
                                                     return newTodo
-                                                    ;
+                                                        ;
                                                 }
                                                 return t;
                                             });
