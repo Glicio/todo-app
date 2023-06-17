@@ -1,4 +1,4 @@
-import { Avatar, Badge, Tabs } from '@mantine/core';
+import { Avatar, Badge, Skeleton, Tabs } from '@mantine/core';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { userContext } from '~/contexts/UserProvider';
@@ -168,7 +168,7 @@ const TeamMembers = ({ team }: {
     }, {
         onError: (err) => {
             console.error(err)
-        }
+        },
     });
     const [teamMembers, setTeamMembers] = React.useState<typeof teamMembersMutation.data | undefined>(undefined);
     const [createInvite, { open: openCreateInvite, close: closeCreateInvite }] = useDisclosure();
@@ -190,12 +190,21 @@ const TeamMembers = ({ team }: {
                         >Invite user</button>
                     </div>
                 </div>
-                {teamMembers ? teamMembers.map((member) => {
+                {teamMembers && !teamMembersMutation.isLoading ? teamMembers.map((member) => {
                     return (
                         <Member key={member.id} member={member} isOwner={member.id === team.ownerId} />
                     )
                 }
                 ) : null}
+                {teamMembersMutation.isLoading ?
+                    <div className="flex gap-2 p-2 border rounded-md">
+                        <Skeleton circle height={50} width={200} />
+                        <div className="flex flex-col h-full flex-grow gap-2 p-2">
+                            <Skeleton height={15} width={"90%"}/>
+                            <Skeleton height={10} width={"75%"}/>
+                        </div>
+                    </div>
+                    : null}
             </div>
         </div>
     )
@@ -256,6 +265,13 @@ const UpdateInfoForm = ({ team, setTeam }: {
             })
         }
     });
+
+    React.useEffect(() => {
+        if (team) {
+            setNewTeam(team)
+        }
+    }, [team])
+
     return (
         <form className="flex flex-col w-full flex-grow gap-2 p-2 items-center"
 
@@ -339,15 +355,23 @@ export default function Teams() {
     }, [])
 
     React.useEffect(() => {
-        if (team.id !== agent?.id) {
-            void router.push(`/`);
+        if (agent) {
+            setTeam({
+                id: agent.id,
+                name: agent.name || "",
+                color: agent.color || "",
+                image: agent.image || "",
+                ownerId: agent.ownerId || "",
+            })
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [agent])
+
     if (agentType === "user" || !agent) {
         void router.push("/");
         return null
     }
+
     return (
         <div className="flex flex-col w-full ">
             <Tabs defaultValue="info"
