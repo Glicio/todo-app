@@ -191,7 +191,8 @@ export const teams = createTRPCRouter({
     ).mutation(async ({ input, ctx }): Promise<{
         invitationId: string,
         invitationLink: string,
-        type: "email" | "link"}> => {
+        type: "email" | "link"
+    }> => {
         if (!await checkUserInTeam({ userId: ctx.session.user.id, teamId: input.teamId })) {
             throw new TRPCError({
                 code: "BAD_REQUEST",
@@ -204,6 +205,7 @@ export const teams = createTRPCRouter({
             },
             select: {
                 ownerId: true,
+                name: true,
             },
         });
 
@@ -240,7 +242,7 @@ export const teams = createTRPCRouter({
                 },
             });
             if (invitations.length > 0) {
-                if(!invitations[0]?.id) {
+                if (!invitations[0]?.id) {
                     throw new TRPCError({
                         code: "INTERNAL_SERVER_ERROR",
                         message: "Error while creating invitation",
@@ -273,12 +275,46 @@ export const teams = createTRPCRouter({
             },
         });
         if (input.email) {
-            console.log("sending email");
+            try {
+                const { email } = input
+                const req = await fetch("https://api.sendgrid.com/v3/mail/send", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${process.env.SENDGRID_API_KEY || ""}`,
+                    },
+                    body: JSON.stringify({
+                        from: {
+                            name: "Glicio",
+                            email: "noreply@glicio.dev",
+                        },
+                        personalizations: [
+                            {
+                                to: [{ email: email }],
+                                dynamic_template_data: {
+                                    teamOwner: ctx.session.user.name,
+                                    teamName: team.name,
+                                    invitationLink: `${getBaseUrl()}/join-team/${invitation.id}`,
+                                },
+                            },
+                        ],
+                        template_id: process.env.INVITATION_TEMPLATE_ID || "",
+                    })
+                });
+                console.log(req.status, req.statusText)
+
+            } catch (e) {
+                console.error(e);
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Error while sending email",
+                });
+            }
             return {
                 invitationId: invitation.id,
                 invitationLink: `${getBaseUrl()}/join-team/${invitation.id}`,
                 type: "email",
-                }
+            }
         }
 
         return {

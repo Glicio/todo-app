@@ -91,7 +91,7 @@ export default function Todos({done}: {done: boolean}) {
                                         </button>
                                     ) : null}
                                 </div>
-                                <div className="thin-scroll flex gap-2 overflow-auto pb-2 pt-1 ">
+                                <div className="thin-scroll flex gap-2 overflow-auto pb-2 pt-1 h-8">
                                     {categoriesList &&
                                         categoriesList.map((category) => (
                                             <CategoryLabel
