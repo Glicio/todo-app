@@ -6,6 +6,38 @@ import { db, prisma } from "~/server/db";
 import checkUserInTeam from "~/utils/check_usr_in_team";
 import type SimpleUser from "~/utils/simple_user";
 
+
+const include = {
+    createdBy: {
+        select: {
+            name: true,
+            image: true,
+            id: true,
+        },
+    },
+    updatedBy: {
+        select: {
+            name: true,
+            image: true,
+            id: true,
+        },
+    },
+    assignedTo: {
+        select: {
+            name: true,
+            id: true,
+        },
+    },
+    categories: {
+        select: {
+            name: true,
+            id: true,
+            color: true,
+        },
+    },
+}
+
+
 export const todos = createTRPCRouter({
     /**
      * needs to be updated to the new agent mode
@@ -53,7 +85,7 @@ export const todos = createTRPCRouter({
             }
 
             if (agentType === "team") {
-                if(!await checkUserInTeam({userId: ctx.session.user.id, teamId: agentId})) throw new TRPCError({code: "UNAUTHORIZED"})
+                if (!await checkUserInTeam({ userId: ctx.session.user.id, teamId: agentId })) throw new TRPCError({ code: "UNAUTHORIZED" })
             } else {
                 if (ctx.session.user.id !== agentId)
                     throw new TRPCError({ code: "UNAUTHORIZED" });
@@ -62,32 +94,13 @@ export const todos = createTRPCRouter({
 
 
             try {
-                
+
                 const todosQuery = prisma.todo.findMany({
                     where: {
-                        [agentType === "team" ? "teamId" : "userId"]:  agentId,
+                        [agentType === "team" ? "teamId" : "userId"]: agentId,
                         done: input.done,
                     },
-                    include: {
-                        createdBy: {
-                            select: {
-                                name: true,
-                                id: true,
-                            },
-                        },
-                        updatedBy: {
-                            select: {
-                                name: true,
-                                id: true,
-                            },
-                        },
-                        assignedTo: {
-                            select: {
-                                name: true,
-                                id: true,
-                            },
-                        },
-                    }
+                    include: include,
                 })
                 const categoriesQuery = prisma.category.findMany({
                     where: agentType === "team" ? { teamId: agentId } : { userId: agentId },
@@ -101,23 +114,9 @@ export const todos = createTRPCRouter({
                     todosQuery,
                     categoriesQuery,
                 ]);
-                const todosWithCategory = todos.map((todo) => {
-                    const category = categories.find(
-                        (category) => category.id === todo.categoryId
-                    );
-                    return {
-                        ...todo,
-                        category: category
-                            ? {
-                                  name: category.name,
-                                  id: category.id,
-                                  color: category.color,
-                              }
-                            : undefined,
-                    };
-                });
+
                 return {
-                    todos: todosWithCategory,
+                    todos: todos,
                     categories: categories,
                 };
             } catch (e) {
@@ -142,7 +141,7 @@ export const todos = createTRPCRouter({
                 title: z.string(),
                 dueDate: z.date().optional(),
                 description: z.string().optional(),
-                categoryId: z.string().optional(),
+                categoriesIds: z.array(z.string()).optional(),
                 agentType: z.enum(["user", "team"]),
                 agentId: z.string(),
                 assignedUsersIds: z.array(z.string()).optional(),
@@ -153,7 +152,7 @@ export const todos = createTRPCRouter({
                 title,
                 dueDate,
                 description,
-                categoryId,
+                categoriesIds,
                 agentType,
                 agentId,
                 assignedUsersIds,
@@ -226,8 +225,8 @@ export const todos = createTRPCRouter({
                                 id: ctx.session.user.id,
                             },
                         },
-                        category: categoryId
-                            ? { connect: { id: categoryId } }
+                        categories: categoriesIds
+                            ? { connect: categoriesIds.map(curr => ({ id: curr })) }
                             : undefined,
                         user:
                             agentType === "user"
@@ -241,77 +240,33 @@ export const todos = createTRPCRouter({
                             ? { connect: assignedUsersIds.map(curr => ({ id: curr })) }
                             : undefined,
                     },
-                    include: {
-                        createdBy: {
-                            select: {
-                                name: true,
-                                id: true,
-                            },
-                        },
-                        updatedBy: {
-                            select: {
-                                name: true,
-                                id: true,
-                            },
-                        },
-                        assignedTo: {
-                            select: {
-                                name: true,
-                                id: true,
-                            },
-                        },
-                        category: {
-                            select: {
-                                name: true,
-                                id: true,
-                                color: true,
-                            },
-                        },
-                    },
-
+                    include: include,
                 });
+                // increment the todos created count
                 const agent =
                     agentType === "user"
                         ? prisma.user.update({
-                              where: {
-                                  id: ctx.session.user.id,
-                              },
-                              data: {
-                                  todosCreatedCount: {
-                                      increment: 1,
-                                  },
-                              },
-                          })
+                            where: {
+                                id: ctx.session.user.id,
+                            },
+                            data: {
+                                todosCreatedCount: {
+                                    increment: 1,
+                                },
+                            },
+                        })
                         : prisma.team.update({
-                              where: {
-                                  id: agentId,
-                              },
-                              data: {
-                                  todosCount: {
-                                      increment: 1,
-                                  },
-                              },
-                          });
-                const [todo, owner] = await prisma.$transaction([newTodo, agent]);
-                if(agentType === "user") {
-                    return {...todo, createdBy: {name: owner.name, id: owner.id}}
-                }
-                const createdBy = await prisma.user.findUnique({
-                    where: {
-                        id: todo.createdById
-                    },
-                    select: {
-                        name: true,
-                        id: true
-                    }
-                })
-                if(!createdBy) {
-                    throw new TRPCError({
-                        code: "INTERNAL_SERVER_ERROR",
-                        message: "Error while creating todo",
-                    });
-                }
-                return {...todo, createdBy: createdBy as SimpleUser}
+                            where: {
+                                id: agentId,
+                            },
+                            data: {
+                                todosCount: {
+                                    increment: 1,
+                                },
+                            },
+                        });
+                const [todo] = await prisma.$transaction([newTodo, agent]);
+                return todo
             } catch (e) {
                 console.log(e);
                 throw new TRPCError({
@@ -356,21 +311,21 @@ export const todos = createTRPCRouter({
                 const user =
                     input.agentType === "user"
                         ? prisma.user.update({
-                              where: { id: ctx.session.user.id },
-                              data: {
-                                  todosCreatedCount: {
-                                      decrement: 1,
-                                  },
-                              },
-                          })
+                            where: { id: ctx.session.user.id },
+                            data: {
+                                todosCreatedCount: {
+                                    decrement: 1,
+                                },
+                            },
+                        })
                         : prisma.team.update({
-                              where: { id: input.agentId },
-                              data: {
-                                  todosCount: {
-                                      decrement: 1,
-                                  },
-                              },
-                          });
+                            where: { id: input.agentId },
+                            data: {
+                                todosCount: {
+                                    decrement: 1,
+                                },
+                            },
+                        });
 
                 await prisma.$transaction([todoToDelete, user]);
             } catch (e) {
@@ -493,7 +448,7 @@ export const todos = createTRPCRouter({
                 title: z.string(),
                 dueDate: z.date().optional().nullable(),
                 description: z.string().optional().nullable(),
-                categoryId: z.string().nullable(),
+                categoriesIds: z.array(z.string()).nullable(),
                 assignedUsersIds: z.array(z.string()).optional().nullable(),
             })
         )
@@ -525,20 +480,20 @@ export const todos = createTRPCRouter({
                 });
             }
 
-            if(todo.done) {
+            if (todo.done) {
                 throw new TRPCError({
                     code: "BAD_REQUEST",
                     message: "You can't edit a todo that is already done",
                 });
             }
 
-            if(input.agentType === "team" && todo.teamId !== input.agentId) {
+            if (input.agentType === "team" && todo.teamId !== input.agentId) {
                 throw new TRPCError({
                     code: "UNAUTHORIZED",
                     message: "You can't edit a todo that is not in your team",
                 });
             }
-            if(input.agentType === "user" && todo.userId !== ctx.session.user.id) {
+            if (input.agentType === "user" && todo.userId !== ctx.session.user.id) {
                 throw new TRPCError({
                     code: "UNAUTHORIZED",
                     message: "You can't edit a todo that is not yours",
@@ -558,13 +513,13 @@ export const todos = createTRPCRouter({
                                 id: ctx.session.user.id,
                             },
                         },
-                        category: input.categoryId
+                        categories: input.categoriesIds
                             ? {
-                                  connect: {
-                                      id: input.categoryId,
-                                  },
-                              }
-                            : { disconnect: true },
+                                connect: input.categoriesIds.map((id) => ({
+                                    id,
+                                })),
+                            }
+                            : { set: [] },
 
                         assignedTo: input.assignedUsersIds
                             ? {
@@ -574,64 +529,23 @@ export const todos = createTRPCRouter({
                                 })),
                             }
                             : { set: [] },
-                                
-                        },
-                    include: {
-                        createdBy: {
-                            select: {
-                                name: true,
-                                id: true,
-                            },
-                        },
-                        updatedBy: {
-                            select: {
-                                name: true,
-                                id: true,
-                            },
-                        },
-                        assignedTo: {
-                            select: {
-                                name: true,
-                                id: true,
-                            },
-                        },
-                        category: {
-                            select: {
-                                name: true,
-                                id: true,
-                                color: true,
-                            },
-                        },
+
                     },
-                    },
+                    include: include,
+                },
                 );
-                const user = await prisma.user.findUnique({
-                    where: { id: ctx.session.user.id },
-                });
-
-                if(!user) {
-                    throw new TRPCError({
-                        code: "INTERNAL_SERVER_ERROR",
-                        message: "Error while updating todo",
-                    });
-                }
-
-                if(user.id === todo.createdById) {
-                    return {...todo,createdBy: user, updatedBy: user};
-                }
-
                 const createdBy = await prisma.user.findUnique({
                     where: { id: todo.createdById },
                 });
 
-                if(!createdBy) {
+                if (!createdBy) {
                     throw new TRPCError({
                         code: "INTERNAL_SERVER_ERROR",
                         message: "Error while updating todo",
                     });
                 }
 
-                return {...todo, updatedBy: user, createdBy};
+                return todo;
 
             } catch (e) {
                 console.log(e);

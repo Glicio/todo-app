@@ -19,7 +19,7 @@ interface TodoState {
     title: string;
     description?: string;
     dueDate?: Date;
-    categoryId?: string;
+    categoriesId?: string[];
     assignedTo?: string[];
 }
 
@@ -42,7 +42,6 @@ const todoInitialState: TodoState = {
     title: "",
     description: "",
     dueDate: new Date(),
-    categoryId: "",
 };
 
 /**
@@ -121,7 +120,7 @@ export default function AddTodo({
                     title: todoToEdit.title,
                     description: todoToEdit.description || undefined,
                     dueDate: todoToEdit.dueDate ? new Date(todoToEdit.dueDate) : undefined,
-                    categoryId: todoToEdit.categoryId || undefined,
+                    categoriesId: todoToEdit.categories.length > 0 ? todoToEdit.categories.map(curr => curr.id) : undefined,
                     assignedTo: todoToEdit.assignedTo?.map(curr => curr.id) || []
                 }
             })
@@ -146,7 +145,7 @@ export default function AddTodo({
                             title: todo.title,
                             description: todo.description || null,
                             dueDate: activeDate ? todo.dueDate || null : null,
-                            categoryId: todo.categoryId || null,
+                            categoriesIds: todo.categoriesId || null,
                             assignedUsersIds: todo.assignedTo || null,
                         })
                     }
@@ -156,12 +155,12 @@ export default function AddTodo({
                         title: todo.title,
                         description: todo.description,
                         dueDate: activeDate ? todo.dueDate : undefined,
-                        categoryId: todo.categoryId || undefined,
+                        categoriesIds: todo.categoriesId,
                         assignedUsersIds: todo.assignedTo || undefined,
                     });
                 }}
             >
-                <DefaultSelect
+                <DefaultMultiSelect
                     clearable
                     label="Category"
                     placeholder="Select a category"
@@ -169,9 +168,9 @@ export default function AddTodo({
                         value: category.id,
                         label: category.name,
                     }))}
-                    value={todo.categoryId}
+                    value={todo.categoriesId || []}
                     onChange={(value) => {
-                        dispatch({ type: "categoryId", payload: value })
+                        dispatch({ type: "categoriesId", payload: value })
                     }}
                 />
                 {agentType === "team" ?

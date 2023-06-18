@@ -7,6 +7,7 @@ import TodoComponent from "./todo_component";
 import { TodoContext } from "~/contexts/TodoContext";
 import type SimpleCategory from "~/utils/simple_category";
 import type SimpleTodo from "~/utils/simple_todo";
+import NewTodoComponent from "./new_todo_component";
 
 
 
@@ -39,15 +40,26 @@ export default function Todos({ done }: { done: boolean }) {
     }, [todos, done])
 
     React.useEffect(() => {
-        const activeCategories = todosList.map(todo => todo.categoryId).filter((id) => id !== undefined) as string[]
-        setCategoriesList(categories.filter(category => activeCategories.includes(category.id)))
+        const activeCategories = new Set<string>()
+        for (const todo of todosList) {
+            console.log(todo)
+            if(todo.categories.length === 0) continue
+            for (const category of todo.categories) {
+                console.log(category)
+                activeCategories.add(category.id)
+            }
+        }
+        console.log(activeCategories)
+        setCategoriesList(categories.filter(category => activeCategories.has(category.id)))
     }, [categories, todosList])
 
     React.useEffect(() => {
         if (selectedCategory.length > 0) {
             setFilteredTodos(
                 todosList.filter((todo) =>
-                    selectedCategory.includes(todo.categoryId as string)
+                    todo.categories?.some((category) =>
+                        selectedCategory.includes(category.id)
+                     )
                 )
             );
         } else {
@@ -147,7 +159,7 @@ export default function Todos({ done }: { done: boolean }) {
                         gridTemplateColumns: "repeat(auto-fill, 25rem)",
                     }}
                 >
-                    {filteredTodos &&
+                    {/*filteredTodos &&
                         filteredTodos
                             .map((todo) => (
                                 <TodoComponent
@@ -175,6 +187,11 @@ export default function Todos({ done }: { done: boolean }) {
                                         });
                                     }}
                                 />
+                            ))*/}
+                    {filteredTodos &&
+                        filteredTodos
+                            .map((todo) => (
+                                <NewTodoComponent todo={todo} key={todo.id}/>
                             ))}
                 </div>
                 <div className="h-14 w-full"></div>

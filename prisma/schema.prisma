@@ -101,13 +101,12 @@ model Todo {
     doneBy      User?     @relation("todoDoneBy", fields: [doneById], references: [id], onDelete: Cascade)
     doneById    String?
 
-    categoryId String?
-    category   Category? @relation(fields: [categoryId], references: [id])
+    categories Category[]
 
     teamId String?
     team   Team?   @relation(fields: [teamId], references: [id])
 
-    assignedTo User[]  @relation("todosAssigned")
+    assignedTo User[] @relation("todosAssigned")
 
     //indexes
     @@index([doneById])
@@ -115,7 +114,6 @@ model Todo {
     @@index([createdById])
     @@index([teamId])
     @@index([userId])
-    @@index([categoryId])
 }
 
 model Category {
