@@ -4,7 +4,7 @@ import React from 'react';
 
 export default function InfoIcon({ size }: { size?: string }) {
 	return (
-		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
+		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor"
 			style={{
 				width: size ? size : "1.5rem",
 				height: size ? size : "1.5rem"
