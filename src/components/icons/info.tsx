@@ -2,7 +2,7 @@ import React from 'react';
 
 
 
-export default function InfoIcon({ size }: { size?: number }) {
+export default function InfoIcon({ size }: { size?: string}) {
 	return (
 		<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
 			className={size ? `w-[${size}] h-[${size}]` : "w-6 h-6"}>
