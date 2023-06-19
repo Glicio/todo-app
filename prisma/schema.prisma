@@ -78,6 +78,28 @@ model Session {
     @@index([userId])
 }
 
+model TodoStep {
+    id          String    @id @default(cuid())
+    title       String
+    done        Boolean   @default(false)
+    todoId      String
+    todo        Todo      @relation("steps", fields: [todoId], references: [id], onDelete: Cascade)
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime?
+    doneAt      DateTime?
+    doneBy      User?     @relation("stepsDone", fields: [doneById], references: [id], onDelete: Cascade)
+    doneById    String?
+    updatedBy   User?     @relation("stepsUpdated", fields: [updatedById], references: [id], onDelete: Cascade)
+    updatedById String?
+    createdBy   User      @relation("stepsCreated", fields: [createdById], references: [id], onDelete: Cascade)
+    createdById String
+
+    @@index([doneById])
+    @@index([updatedById])
+    @@index([createdById])
+    @@index([todoId])
+}
+
 model Todo {
     id          String    @id @default(cuid())
     //content
@@ -106,7 +128,8 @@ model Todo {
     teamId String?
     team   Team?   @relation(fields: [teamId], references: [id])
 
-    assignedTo User[] @relation("todosAssigned")
+    assignedTo User[]      @relation("todosAssigned")
+    steps      TodoStep[] @relation("steps")
 
     //indexes
     @@index([doneById])
@@ -171,6 +194,10 @@ model User {
     todosAssigned Todo[] @relation("todosAssigned")
 
     TeamInvitation TeamInvitation[] @relation("invitationsCreated")
+
+    stepsDone      TodoStep[]      @relation("stepsDone")
+    stepsUpdated   TodoStep[]      @relation("stepsUpdated")
+    stepsCreated   TodoStep[]      @relation("stepsCreated")
 }
 
 model VerificationToken {
