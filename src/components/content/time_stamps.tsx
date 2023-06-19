@@ -9,8 +9,8 @@ export default function TimeStamps({createdByName, createdAt, updatedByName, upd
 
     return (
 
-        <div className="timestamps pt-1"
-            style={{ fontSize: "10px" }}
+        <div className="timestamps pt-1 "
+            style={{ fontSize: "10px", lineHeight: "10px"  }}
         >
             <div className="created">
                 Created 
