@@ -9,7 +9,9 @@ export default function TimeStamps({createdByName, createdAt, updatedByName, upd
 
     return (
 
-        <div className="timestamps px-2 pt-1 text-xs">
+        <div className="timestamps pt-1"
+            style={{ fontSize: "10px" }}
+        >
             <div className="created">
                 Created 
                 {createdByName ? <>by{" "}
