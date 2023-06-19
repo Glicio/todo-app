@@ -194,7 +194,8 @@ export default function Todos({ done }: { done: boolean }) {
                                 <NewTodoComponent todo={todo} key={todo.id}/>
                             ))}
                 </div>
-                <div className="h-14 w-full"></div>
+                {/* add button space */}
+                <div className="h-20 w-full"></div>
             </div>
         </div>
     );
