@@ -45,6 +45,16 @@
     background: var(--secondary-color);
 }
 
+.no-scroll::-webkit-scrollbar {
+    width: 2px;
+    height: 2px;
+}
+.no-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+.no-scroll::-webkit-scrollbar-thumb {
+    background: transparent;
+}
 
 .cool-text{
     color: transparent;
