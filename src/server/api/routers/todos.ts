@@ -453,6 +453,7 @@ export const todos = createTRPCRouter({
             })
         )
         .mutation(async ({ ctx, input }) => {
+            console.log(input.categoriesIds);
             if (!ctx.session.user)
                 throw new TRPCError({ code: "UNAUTHORIZED" });
             if (input.agentType === "team") {
@@ -513,7 +514,7 @@ export const todos = createTRPCRouter({
                                 id: ctx.session.user.id,
                             },
                         },
-                        categories: input.categoriesIds
+                        categories: input.categoriesIds && input.categoriesIds.length > 0
                             ? {
                                 connect: input.categoriesIds.map((id) => ({
                                     id,
@@ -521,9 +522,8 @@ export const todos = createTRPCRouter({
                             }
                             : { set: [] },
 
-                        assignedTo: input.assignedUsersIds
+                        assignedTo: input.assignedUsersIds && input.assignedUsersIds.length > 0
                             ? {
-                                set: [],
                                 connect: input.assignedUsersIds.map((id) => ({
                                     id,
                                 })),
