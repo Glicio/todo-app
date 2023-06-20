@@ -3,7 +3,6 @@ import AddTodo from "../forms/add_todo";
 import CategoryLabel from "../misc/category_label";
 import CloseIcon from "../icons/close";
 import AddBtn from "../input/add_btn";
-import TodoComponent from "./todo_component";
 import { TodoContext } from "~/contexts/TodoContext";
 import type SimpleCategory from "~/utils/simple_category";
 import type SimpleTodo from "~/utils/simple_todo";
@@ -167,35 +166,6 @@ export default function Todos({ done }: { done: boolean }) {
                         gridTemplateColumns: "repeat(auto-fill, 25rem)",
                     }}
                 >
-                    {/*filteredTodos &&
-                        filteredTodos
-                            .map((todo) => (
-                                <TodoComponent
-                                    key={todo.id}
-                                    todo={todo}
-                                    openEdit={() => {
-                                        setShowAddTodo(true);
-                                        setTodoToEdit(todo);
-                                    }}
-                                    onDelete={(id) => {
-                                        removeTodo(id);
-                                    }}
-                                    onDone={(id) => {
-                                        removeTodo(id);
-                                    }}
-                                    onEdit={(newTodo) => {
-                                        setTodos((old) => {
-                                            return old.map((t) => {
-                                                if (t.id === todo.id) {
-                                                    return newTodo
-                                                        ;
-                                                }
-                                                return t;
-                                            });
-                                        });
-                                    }}
-                                />
-                            ))*/}
                     {filteredTodos &&
                         filteredTodos
                             .map((todo) => (
