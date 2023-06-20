@@ -4,8 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { db, prisma } from "~/server/db";
 import checkUserInTeam from "~/utils/check_usr_in_team";
-import type { User } from "@prisma/client";
-import SimpleUser from "~/utils/simple_user";
+import type SimpleUser from "~/utils/simple_user";
 
 export const category = createTRPCRouter({
     /**
@@ -63,12 +62,14 @@ export const category = createTRPCRouter({
                             select: {
                                 id: true,
                                 name: true,
-                            }} : undefined,
+                            }
+                        } : undefined,
                         updatedBy: input.includeUser ? {
                             select: {
                                 id: true,
                                 name: true,
-                            }} : undefined,
+                            }
+                        } : undefined,
                     },
                 });
                 return categories;
@@ -116,7 +117,7 @@ export const category = createTRPCRouter({
                             },
                         },
                         [input.agentType === "user" ? "user" : "team"]:
-                            {
+                        {
                             connect: {
                                 id: agentId,
                             }
@@ -151,8 +152,8 @@ export const category = createTRPCRouter({
                         name: true,
                     },
                 });
-               const [category,_, user] = await prisma.$transaction([newCategory, agent, userQuery]);
-                return {...category, createdBy: user as SimpleUser};
+                const [category, _, user] = await prisma.$transaction([newCategory, agent, userQuery]);
+                return { ...category, createdBy: user as SimpleUser };
             } catch (e) {
                 console.log(e);
                 throw new TRPCError({
@@ -162,9 +163,9 @@ export const category = createTRPCRouter({
             }
         }
         ),
-        /**
-        * deletes a category for the current agent
-        * */
+    /**
+    * deletes a category for the current agent
+    * */
     deleteCategory: protectedProcedure
         .input(
             z.object({
@@ -176,7 +177,7 @@ export const category = createTRPCRouter({
         )
         .mutation(async ({ input, ctx }) => {
 
-            if(!ctx.session.user) throw new TRPCError({code: "UNAUTHORIZED"});
+            if (!ctx.session.user) throw new TRPCError({ code: "UNAUTHORIZED" });
             const { agentType, agentId, categoryId } = input;
             if (
                 agentType === "team" &&
@@ -188,10 +189,14 @@ export const category = createTRPCRouter({
                 throw new TRPCError({ code: "UNAUTHORIZED" });
             }
             try {
-                if(input.deleteTodos){
+                if (input.deleteTodos) {
                     const todos = await prisma.todo.deleteMany({
                         where: {
-                            categoryId: categoryId,
+                            categories: {
+                                some: {
+                                    id: categoryId,
+                                }
+                            }
                         },
                     });
 
@@ -247,21 +252,23 @@ export const category = createTRPCRouter({
                         },
                     },
                 });
-                const todos = prisma.todo.updateMany({
+                    
+                const disconnect = prisma.category.update({
                     where: {
-                        categoryId: categoryId,
+                        id: categoryId,
                     },
                     data: {
-                        categoryId: null,
+                        todos: {
+                            set: [],
+                        },
                     },
-                })
-
+                });
                 const category = prisma.category.delete({
                     where: {
                         id: categoryId,
                     },
                 });
-                await prisma.$transaction([agent, todos, category]);
+                await prisma.$transaction([agent, disconnect, category]);
                 return true;
 
 
@@ -274,9 +281,9 @@ export const category = createTRPCRouter({
             }
         }
         ),
-        /**
-        * updates a category for the current agent
-        * */
+    /**
+    * updates a category for the current agent
+    * */
     updateCategory: protectedProcedure
         .input(
             z.object({
@@ -287,94 +294,94 @@ export const category = createTRPCRouter({
                 color: z.string().regex(/^#[0-9A-F]{6}$/i).optional(),
                 description: z.string().optional(),
             }))
-            .mutation(async ({ input, ctx }) => {
-                if(!ctx.session.user) throw new TRPCError({code: "UNAUTHORIZED"});
-                const { agentType, agentId, categoryId } = input;
-                if (
-                    agentType === "team" &&
-                    !(await checkUserInTeam({
-                        teamId: agentId,
-                        userId: ctx.session.user.id,
-                    }))
-                ) {
-                    throw new TRPCError({ code: "UNAUTHORIZED" });
-                }
-                const category = await prisma.category.findUnique({
-                    where: {
-                        id: categoryId,
-                    },
-                });
-                if (!category) {
-                    throw new TRPCError({
-                        code: "NOT_FOUND",
-                        message: "Category not found",
-                    });
-                }
-                if(agentType === "user" && category.userId !== ctx.session.user.id){
-                    throw new TRPCError({
-                        code: "UNAUTHORIZED",
-                        message: "You are not authorized to update this category",
-                    });
-                }
-                if(agentType === "team" && category.teamId !== agentId){
-                    throw new TRPCError({
-                        code: "UNAUTHORIZED",
-                        message: "You are not authorized to update this category",
-                    });
-                }
-
-                    const updatedCategory = await prisma.category.update({
-                        where: {
-                            id: categoryId,
-                        },
-                        data: {
-                            name: input.name,
-                            color: input.color,
-                            description: input.description || null,
-                            updatedBy: {
-                                connect: {
-                                    id: ctx.session.user.id,
-                                    }
-                            },
-                            updatedAt: new Date(),
-                        },
-                    });
-
-                    const userQuery = await prisma.user.findUnique({
-                        where: {
-                            id: updatedCategory.createdById,
-                        },
-                        select: {
-                            id: true,
-                            name: true,
-                        },
-                    });
-                    
-                    if(!userQuery) throw new TRPCError({code: "INTERNAL_SERVER_ERROR", message: "Error while updating category"});
-
-                    if(updatedCategory.createdById === ctx.session.user.id){
-                        return {...updatedCategory, createdBy: userQuery, updatedBy: userQuery};
-                    }
-
-                    const updatedByQuery = await prisma.user.findUnique({
-                        where: {
-                            id: ctx.session.user.id,
-                        },
-                        select: {
-                            id: true,
-                            name: true,
-                        },
-                    });
-
-                    if(!updatedByQuery) throw new TRPCError({code: "INTERNAL_SERVER_ERROR", message: "Error while updating category"});
-                    
-                    return {...updatedCategory, createdBy: userQuery, updatedBy: updatedByQuery};
-
-                    
-
+        .mutation(async ({ input, ctx }) => {
+            if (!ctx.session.user) throw new TRPCError({ code: "UNAUTHORIZED" });
+            const { agentType, agentId, categoryId } = input;
+            if (
+                agentType === "team" &&
+                !(await checkUserInTeam({
+                    teamId: agentId,
+                    userId: ctx.session.user.id,
+                }))
+            ) {
+                throw new TRPCError({ code: "UNAUTHORIZED" });
             }
+            const category = await prisma.category.findUnique({
+                where: {
+                    id: categoryId,
+                },
+            });
+            if (!category) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Category not found",
+                });
+            }
+            if (agentType === "user" && category.userId !== ctx.session.user.id) {
+                throw new TRPCError({
+                    code: "UNAUTHORIZED",
+                    message: "You are not authorized to update this category",
+                });
+            }
+            if (agentType === "team" && category.teamId !== agentId) {
+                throw new TRPCError({
+                    code: "UNAUTHORIZED",
+                    message: "You are not authorized to update this category",
+                });
+            }
+
+            const updatedCategory = await prisma.category.update({
+                where: {
+                    id: categoryId,
+                },
+                data: {
+                    name: input.name,
+                    color: input.color,
+                    description: input.description || null,
+                    updatedBy: {
+                        connect: {
+                            id: ctx.session.user.id,
+                        }
+                    },
+                    updatedAt: new Date(),
+                },
+            });
+
+            const userQuery = await prisma.user.findUnique({
+                where: {
+                    id: updatedCategory.createdById,
+                },
+                select: {
+                    id: true,
+                    name: true,
+                },
+            });
+
+            if (!userQuery) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Error while updating category" });
+
+            if (updatedCategory.createdById === ctx.session.user.id) {
+                return { ...updatedCategory, createdBy: userQuery, updatedBy: userQuery };
+            }
+
+            const updatedByQuery = await prisma.user.findUnique({
+                where: {
+                    id: ctx.session.user.id,
+                },
+                select: {
+                    id: true,
+                    name: true,
+                },
+            });
+
+            if (!updatedByQuery) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Error while updating category" });
+
+            return { ...updatedCategory, createdBy: userQuery, updatedBy: updatedByQuery };
+
+
+
+        }
         ),
-        
+
 
 
 });
