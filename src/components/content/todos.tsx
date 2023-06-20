@@ -17,7 +17,7 @@ export default function Todos({ done }: { done: boolean }) {
     const [showAddTodo, setShowAddTodo] = React.useState(false);
     const [selectedCategory, setSelectedCategory] = React.useState<string[]>([]);
     const { todos, categories, setTodos, isLoading } = React.useContext(TodoContext);
-    const {agent, agentType} = React.useContext(userContext)
+    const { agent, agentType } = React.useContext(userContext)
     const [todosList, setTodosList] = React.useState<SimpleTodo[]>([]);
     const [filteredTodos, setFilteredTodos] = React.useState<SimpleTodo[]>([]);
     const [categoriesList, setCategoriesList] = React.useState<SimpleCategory[]>([]);
@@ -44,7 +44,7 @@ export default function Todos({ done }: { done: boolean }) {
         const activeCategories = new Set<string>()
         for (const todo of todosList) {
             console.log(todo)
-            if(todo.categories.length === 0) continue
+            if (todo.categories.length === 0) continue
             for (const category of todo.categories) {
                 console.log(category)
                 activeCategories.add(category.id)
@@ -61,7 +61,7 @@ export default function Todos({ done }: { done: boolean }) {
                 todosList.filter((todo) =>
                     todo.categories?.some((category) =>
                         selectedCategory.includes(category.id)
-                     )
+                    )
                 )
             );
         } else {
@@ -178,7 +178,14 @@ export default function Todos({ done }: { done: boolean }) {
                                         removeTodo(id);
                                     }}
                                     onDone={(id) => {
-                                        removeTodo(id);
+                                        setTodos((todos) => {
+                                            return todos.map(curr => {
+                                                if (curr.id === id) {
+                                                    return { ...curr, done: !curr.done }
+                                                }
+                                                return curr
+                                            })
+                                        })
                                     }}
                                 />
                             ))}
