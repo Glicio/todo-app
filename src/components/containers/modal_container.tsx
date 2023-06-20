@@ -22,9 +22,13 @@ export default function ModalContainer({
             return {
                 backgroundColor: color,
             }
-        } else if (color && color?.length > 0) {
+        } else if (color && color?.length > 1) {
             return {
                 background: `linear-gradient(${color?.join(", ")})`,
+            }
+        } else if(color && color[0]){
+            return {
+                backgroundColor: color[0],
             }
         } else {
             return {
