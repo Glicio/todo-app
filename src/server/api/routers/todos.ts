@@ -4,7 +4,6 @@ import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { db, prisma } from "~/server/db";
 import checkUserInTeam from "~/utils/check_usr_in_team";
-import type SimpleUser from "~/utils/simple_user";
 
 
 const include = {
