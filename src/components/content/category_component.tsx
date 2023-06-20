@@ -49,15 +49,17 @@ export default function CategoryComponent({
                 );
                 if (deleteTodos) {
                     setTodos((prev) =>
-                        prev.filter((t) => t.categoryId !== category.id)
-                    );
+                        prev.filter(curr => !curr.categories.some(c => c.id === category.id)));
                 } else {
                     setTodos((prev) =>
-                        prev.map((t) => {
-                            if (t.categoryId === category.id) {
-                                return { ...t, categoryId: null, category: null };
+                        prev.map((curr) => {
+                            if (curr.categories.some(c => c.id === category.id)) {
+                                return {
+                                    ...curr,
+                                    categories: curr.categories.filter(c => c.id !== category.id)
+                                }
                             }
-                            return t;
+                            return curr;
                         })
                     );
                 }
