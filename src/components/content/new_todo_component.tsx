@@ -102,6 +102,7 @@ const FullTodo = ({ todo, onDone, onDelete, openEdit }: {
             <TodoActions
                 doLoading={doneMutation.isLoading}
                 deleteLoading={deleteMutation.isLoading}
+                undoLoading={undoMutation.isLoading}
                 done={todo.done}
                 onUndo={() => {
                     if (!agent?.id || !agentType) return
