@@ -30,7 +30,7 @@ export default function TodoActions({
 
     return (
         <div
-            className="flex w-full items-center justify-evenly border-t py-2"
+            className="flex w-full items-center justify-evenly border-t py-2 flex-shrink-0"
             style={{
                 borderColor: borderColor || "var(--disabled-color)",
             }}
