@@ -11,19 +11,21 @@ export default function DefaultMultiSelect(
         onChange,
         required,
         placeholder,
+        disabled,
         clearable
     }: {
         data: { value: string, label: string }[],
         label: string,
         value: string[],
         onChange: (value: string[]) => void,
+        disabled?: boolean,
         required?: boolean,
         placeholder?: string,
         clearable?: boolean,
     }
 ) {
     return (
-    <MultiSelect
+        <MultiSelect
             styles={() => ({
                 item: {
                     '&[data-hovered]': {
@@ -37,20 +39,22 @@ export default function DefaultMultiSelect(
                         stroke: "gray",
                     }
                 },
-                
+
             })}
             classNames={{
                 input: "bg-white text-black rounded-md",
                 dropdown: "bg-white ",
                 item: "text-black",
             }}
-        clearable={clearable}
-        required={required}
-        label={label}
-        placeholder={placeholder}
-        data={data}
-        value={value}
-        onChange={onChange}
-    />
+            disabled={disabled}
+            clearable={clearable}
+            required={required}
+            label={label}
+            placeholder={placeholder}
+            searchable
+            data={data}
+            value={value}
+            onChange={onChange}
+        />
     )
 }
