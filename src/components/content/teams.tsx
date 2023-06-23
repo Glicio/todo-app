@@ -1,4 +1,4 @@
-import { Avatar, Badge, Skeleton, Tabs } from '@mantine/core';
+import { Skeleton, Tabs } from '@mantine/core';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { userContext } from '~/contexts/UserProvider';
@@ -8,7 +8,6 @@ import SelectColor from '../input/select_color';
 import { api } from '~/utils/api';
 import { notifications } from '@mantine/notifications';
 import ErrorIcon from '../icons/erro_icon';
-import UserProfilePic from '../user/UserProfilePic';
 import { useDisclosure } from '@mantine/hooks';
 import ModalContainer from '../containers/modal_container';
 import LoadingIcon from '../misc/loading_icon';
@@ -175,8 +174,8 @@ const TeamMembers = ({ team }: {
                     <div className="flex gap-2 p-2 border rounded-md">
                         <Skeleton circle height={50} width={200} />
                         <div className="flex flex-col h-full flex-grow gap-2 p-2">
-                            <Skeleton height={15} width={"90%"}/>
-                            <Skeleton height={10} width={"75%"}/>
+                            <Skeleton height={15} width={"90%"} />
+                            <Skeleton height={10} width={"75%"} />
                         </div>
                     </div>
                     : null}
