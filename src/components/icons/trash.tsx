@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function Trash() {
+export default function Trash({size}: { size: string }) {
     return (
         <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -8,7 +8,8 @@ export default function Trash() {
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
-            className="h-6 w-6"
+            className={"h-6 w-6"}
+            style={size ? {height: size, width: size} : {height: "1.5rem", width: "1.5rem"}}
         >
             <path
                 strokeLinecap="round"
