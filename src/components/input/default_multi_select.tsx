@@ -26,25 +26,8 @@ export default function DefaultMultiSelect(
 ) {
     return (
         <MultiSelect
-            styles={() => ({
-                item: {
-                    '&[data-hovered]': {
-                        backgroundColor: 'lightgray',
-                        color: 'black',
-                    },
-                },
-                rightSection: {
-                    color: 'black',
-                    "svg": {
-                        stroke: "gray",
-                    }
-                },
-
-            })}
             classNames={{
-                input: "bg-white text-black rounded-md",
-                dropdown: "bg-white ",
-                item: "text-black",
+                input: "",
             }}
             disabled={disabled}
             clearable={clearable}

@@ -21,26 +21,6 @@ export default function DefaultSelect({ data, label, required, placeholder, valu
             onChange={onChange}
             label={label}
             searchable
-            styles={() => ({
-                item: {
-                    '&[data-hovered]': {
-                        backgroundColor: 'lightgray',
-                        color: 'black',
-                    },
-                },
-                rightSection: {
-                    color: 'black',
-                    "svg": {
-                        stroke: "gray",
-                    }
-                },
-                
-            })}
-            classNames={{
-                input: "primary-text-input",
-                dropdown: "bg-white ",
-                item: "text-black",
-            }}
         />
     )
 
