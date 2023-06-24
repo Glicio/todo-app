@@ -34,7 +34,29 @@ const include = {
             color: true,
         },
     },
+    steps: {
+        select: {
+            title: true,
+            id: true,
+            done: true,
+            createdAt: true,
+            updatedAt: true,
+            createdBy: {
+                select: {
+                    name: true,
+                    id: true,
+                },
+            }
+
+        },
+    },
 }
+
+const stepValidator = z.array(z.object({
+    id: z.string().optional(),
+    title: z.string().min(1).max(50),
+    done: z.boolean().optional()
+})).max(50).optional()
 
 
 export const todos = createTRPCRouter({
@@ -90,8 +112,6 @@ export const todos = createTRPCRouter({
                     throw new TRPCError({ code: "UNAUTHORIZED" });
             }
 
-
-
             try {
 
                 const todosQuery = prisma.todo.findMany({
@@ -143,6 +163,7 @@ export const todos = createTRPCRouter({
                 categoriesIds: z.array(z.string()).optional(),
                 agentType: z.enum(["user", "team"]),
                 agentId: z.string(),
+                steps: stepValidator,
                 assignedUsersIds: z.array(z.string()).optional(),
             })
         )
@@ -235,6 +256,15 @@ export const todos = createTRPCRouter({
                             agentType === "team"
                                 ? { connect: { id: agentId } }
                                 : undefined,
+                        steps: input.steps && input.steps.length > 0 ? {
+                            createMany: {
+                                data: input.steps.map(curr => ({
+                                    title: curr.title,
+                                    done: curr.done,
+                                    createdById: ctx.session.user.id,
+                                })),
+                            }
+                        } : undefined,
                         assignedTo: assignedUsersIds
                             ? { connect: assignedUsersIds.map(curr => ({ id: curr })) }
                             : undefined,
@@ -325,8 +355,12 @@ export const todos = createTRPCRouter({
                                 },
                             },
                         });
-
-                await prisma.$transaction([todoToDelete, user]);
+                const deleteSteps = prisma.todoStep.deleteMany({
+                    where: {
+                        todoId: input.id
+                    }
+                })
+                await prisma.$transaction([todoToDelete, user, deleteSteps]);
             } catch (e) {
                 console.log(e);
                 throw new TRPCError({
@@ -448,6 +482,7 @@ export const todos = createTRPCRouter({
                 dueDate: z.date().optional().nullable(),
                 description: z.string().optional().nullable(),
                 categoriesIds: z.array(z.string()).nullable(),
+                steps: stepValidator.nullable(),
                 assignedUsersIds: z.array(z.string()).optional().nullable(),
             })
         )
@@ -501,6 +536,60 @@ export const todos = createTRPCRouter({
             }
 
             try {
+                if (input.steps) {
+                    const oldSteps = await prisma.todoStep.findMany({
+                        where: { todoId: input.todoId },
+                    });
+                    const stepsToDelete = [];
+                    for (const oldStep of oldSteps) {
+                        if (!input.steps.find((step) => step.id === oldStep.id)) {
+                            stepsToDelete.push(oldStep.id);
+                        }
+                    }
+                    await prisma.todoStep.deleteMany({
+                        where: {
+                            id: {
+                                in: stepsToDelete,
+                            },
+                        },
+                    });
+                    const stepsUpsert = [];
+                    for (const step of input.steps) {
+                        const oldStep = oldSteps.find(oldStep => oldStep.id === step.id)
+                        if (!oldStep) {
+                            stepsUpsert.push(step)
+                            continue;
+                        }
+                        if (
+                            oldStep.title !== step.title ||
+                            oldStep.done !== step.done
+                        ) {
+                            stepsUpsert.push(step)
+                        }
+                    }
+                    console.log("to delete:", stepsToDelete)
+                    console.log("to upsert:", stepsUpsert)
+                    await prisma.todo.update({
+                        where: { id: input.todoId },
+                        data: {
+                            steps: {
+                                upsert: stepsUpsert.map((step) => ({
+                                    where: { id: step.id || "null" },
+                                    update: {
+                                        title: step.title,
+                                        done: step.done,
+                                    },
+                                    create: {
+                                        title: step.title,
+                                        done: step.done,
+                                        createdById: ctx.session.user.id,
+                                        },
+                                    }),
+                                ),
+                            },
+                        },
+                    });
+                }
                 const todo = await prisma.todo.update({
                     where: { id: input.todoId },
                     data: {
@@ -528,7 +617,6 @@ export const todos = createTRPCRouter({
                                 })),
                             }
                             : { set: [] },
-
                     },
                     include: include,
                 },
@@ -545,7 +633,6 @@ export const todos = createTRPCRouter({
                 }
 
                 return todo;
-
             } catch (e) {
                 console.log(e);
                 throw new TRPCError({
