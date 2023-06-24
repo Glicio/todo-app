@@ -1,5 +1,6 @@
 import React from 'react';
 import FormItem from './form_item';
+import { InputBase } from '@mantine/core';
 
 
 export default function TextInput({
@@ -17,13 +18,12 @@ export default function TextInput({
     }) {
     return (
         <FormItem label={label}>
-            <input
+            <InputBase
                 type="text"
                 value={value}
                 required={required}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
-                className="primary-text-input"
             />
         </FormItem>
     );
