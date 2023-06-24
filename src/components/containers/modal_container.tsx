@@ -43,13 +43,13 @@ export default function ModalContainer({
             styles={{
                 content: {
                     ...getBgColor(),
-                    padding: "2px",
+                    padding: "1px",
                 }
             }}
             classNames={{
                 overlay: "backdrop-blur",
-                header: "bg-[var(--primary-color)] ",
-                body: "bg-[var(--primary-color)] ",
+                header: "bg-[var(--primary-color)] rounded-t-md",
+                body: "bg-[var(--primary-color)] rounded-b-md ",
                 content: "w-fit rounded-b-md m-auto ",
             }}>
 
