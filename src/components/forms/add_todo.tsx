@@ -5,14 +5,12 @@ import ModalContainer from "../containers/modal_container";
 import { userContext } from "~/contexts/UserProvider";
 import { notifications } from "@mantine/notifications";
 import ErrorIcon from "../icons/erro_icon";
-import TextInput from "../input/text_input";
 import FormItem from "../input/form_item";
 import FormActions from "../input/form_actions";
 import type SimpleTodo from "~/utils/simple_todo";
 import { TodoContext } from "~/contexts/TodoContext";
-import DefaultSelect from "../input/default_select";
 import type SimpleUser from "~/utils/simple_user";
-import DefaultMultiSelect from "../input/default_multi_select";
+import { MultiSelect, TextInput, Textarea } from "@mantine/core";
 
 interface TodoState {
     id?: string;
@@ -52,25 +50,26 @@ export default function AddTodo({
     close,
     onAdd,
     onEdit,
-    todoToEdit
+    todoToEdit,
 }: {
     opened: boolean;
     close: () => void;
     onAdd?: (todo: SimpleTodo) => void;
     onEdit?: (todo: SimpleTodo) => void;
-    todoToEdit?: SimpleTodo
+    todoToEdit?: SimpleTodo;
 }) {
     const { agent, agentType } = React.useContext(userContext);
-    const { categories } = React.useContext(TodoContext)
-    const [teamMembers, setTeamMembers] = React.useState<SimpleUser[]>([])
+    const { categories } = React.useContext(TodoContext);
+    const [teamMembers, setTeamMembers] = React.useState<SimpleUser[]>([]);
     const [todo, dispatch] = React.useReducer(todoReducer, todoInitialState);
     const [activeDate, setActiveDate] = React.useState(false);
     //procedures
-    const getTeamMembers = api.teams.getTeamUsers.useQuery({ teamId: agent?.id as string },
+    const getTeamMembers = api.teams.getTeamUsers.useQuery(
+        { teamId: agent?.id as string },
         {
             enabled: agentType === "team" && agent !== undefined,
         }
-    )
+    );
 
     const addTodo = api.todos.createTodo.useMutation({
         onSuccess: (data) => {
@@ -95,45 +94,71 @@ export default function AddTodo({
                 onEdit(data);
             }
             close();
+        },
+    });
+
+    const getColors = React.useCallback(() => {
+        if(!todo.categoriesId) return []
+        if(todo.categoriesId.length === 1 && todo.categoriesId) {
+            return categories.find((category) => category.id === (todo.categoriesId as string[])[0])?.color || []
         }
-    })
+        const colors: string[] = []
+        for(const categoryId of todo.categoriesId){
+            const color = categories.find((category) => category.id === categoryId)?.color
+            if(color) colors.push(color)
+        }
+        return colors
+    }, [todo.categoriesId, categories])
 
     //rooks
     React.useEffect(() => {
         if (agentType === "team" && agent !== undefined) {
-            void getTeamMembers.refetch()
+            void getTeamMembers.refetch();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [agentType, agent])
+    }, [agentType, agent]);
 
     React.useEffect(() => {
         if (getTeamMembers.data) {
-            setTeamMembers(getTeamMembers.data)
+            setTeamMembers(getTeamMembers.data);
         }
-    }, [getTeamMembers.data])
+    }, [getTeamMembers.data]);
 
     React.useEffect(() => {
         if (todoToEdit) {
             dispatch({
-                type: 'set', payload: {
+                type: "set",
+                payload: {
                     id: todoToEdit.id,
                     title: todoToEdit.title,
                     description: todoToEdit.description || undefined,
-                    dueDate: todoToEdit.dueDate ? new Date(todoToEdit.dueDate) : undefined,
-                    categoriesId: todoToEdit.categories.length > 0 ? todoToEdit.categories.map(curr => curr.id) : undefined,
-                    assignedTo: todoToEdit.assignedTo?.map(curr => curr.id) || []
-                }
-            })
+                    dueDate: todoToEdit.dueDate
+                        ? new Date(todoToEdit.dueDate)
+                        : undefined,
+                    categoriesId:
+                        todoToEdit.categories.length > 0
+                            ? todoToEdit.categories.map((curr) => curr.id)
+                            : undefined,
+                    assignedTo:
+                        todoToEdit.assignedTo?.map((curr) => curr.id) || [],
+                },
+            });
         }
-    }, [todoToEdit])
+    }, [todoToEdit]);
 
     return (
-        <ModalContainer opened={opened} onClose={() => {
-            dispatch({ type: "reset", payload: "" })
-            close()
-        }} title="Add new to-do" keepMounted={false}>
+        <ModalContainer
+            opened={opened}
+            onClose={() => {
+                dispatch({ type: "reset", payload: "" });
+                close();
+            }}
+            color={getColors()} 
+            title="Add new to-do"
+            keepMounted={false}
+        >
             <form
-                className="w-full flex gap-2 flex-col"
+                className="flex w-full flex-col gap-2"
                 onSubmit={(e) => {
                     e.preventDefault();
                     if (!agent) return;
@@ -147,7 +172,7 @@ export default function AddTodo({
                             dueDate: activeDate ? todo.dueDate || null : null,
                             categoriesIds: todo.categoriesId || null,
                             assignedUsersIds: todo.assignedTo || null,
-                        })
+                        });
                     }
                     addTodo.mutate({
                         agentId: agent.id,
@@ -160,7 +185,7 @@ export default function AddTodo({
                     });
                 }}
             >
-                <DefaultMultiSelect
+                <MultiSelect
                     clearable
                     label="Category"
                     placeholder="Select a category"
@@ -170,11 +195,12 @@ export default function AddTodo({
                     }))}
                     value={todo.categoriesId || []}
                     onChange={(value) => {
-                        dispatch({ type: "categoriesId", payload: value })
+                        dispatch({ type: "categoriesId", payload: value });
                     }}
                 />
-                {agentType === "team" ?
-                    <DefaultMultiSelect
+
+                {agentType === "team" ? (
+                    <MultiSelect
                         label="Assigned to"
                         placeholder="Select team members"
                         data={teamMembers.map((member) => ({
@@ -182,67 +208,64 @@ export default function AddTodo({
                             label: member.name || "",
                         }))}
                         value={todo.assignedTo || []}
-                        onChange={(value) => dispatch({ type: "assignedTo", payload: value })}
-                    /> : null}
+                        onChange={(value) =>
+                            dispatch({ type: "assignedTo", payload: value })
+                        }
+                    />
+                ) : null}
 
                 <TextInput
                     label="Title"
                     value={todo.title}
                     required
-                    onChange={(value) =>
-                        dispatch({ type: "title", payload: value })
+                    onChange={(e) =>
+                        dispatch({ type: "title", payload: e.target.value })
                     }
                     placeholder="The title of your todo"
                 />
-                <FormItem label="Description">
-                    <textarea
-                        id="desc"
-                        name="desc"
-                        cols={30}
-                        rows={10}
-                        value={todo.description}
-                        onChange={(e) =>
-                            dispatch({
-                                type: "description",
-                                payload: e.target.value,
-                            })
-                        }
-                        className="primary-text-area"
-                        placeholder="Describe your todo"
-                    ></textarea>
-                </FormItem>
+                <Textarea
+                    label="Description"
+                    cols={30}
+                    rows={10}
+                    value={todo.description}
+                    onChange={(e) =>
+                        dispatch({
+                            type: "description",
+                            payload: e.target.value,
+                        })
+                    }
+                    placeholder="Describe your todo"
+                />
 
-                <FormItem>
-                    <div className="flex items-center gap-1">
-                        <label htmlFor="duedate" className="text-sm font-bold">
-                            Due date
-                        </label>
-                        <input
-                            type="checkbox"
-                            checked={activeDate}
-                            onChange={() => setActiveDate((old) => !old)}
-                            className="rounded-md"
-                        />
-                    </div>
-                    <DateTimePicker
-                        placeholder="Pick date and time"
-                        classNames={{
-                            input: "primary-text-input",
-                        }}
-                        value={todo.dueDate}
-                        aria-disabled={!activeDate}
-                        disabled={!activeDate}
-                        className="rounded-md bg-white"
-                        onChange={(value) => {
-                            if (!value) return;
-                            dispatch({
-                                type: "dueDate",
-                                payload: new Date(value?.toISOString()),
-                            });
-                        }}
-                    />
-                </FormItem>
-                <FormActions loading={addTodo.isLoading || editTodo.isLoading} onCancel={close} />
+                <DateTimePicker
+                    label={
+                        <div className="flex gap-2">
+                            <span>Due Date</span>
+                            <input
+                                type="checkbox"
+                                checked={activeDate}
+                                onChange={(e) =>
+                                    setActiveDate(e.target.checked)
+                                }
+                            />
+                        </div>
+                    }
+                    placeholder="Pick date and time"
+                    value={todo.dueDate}
+                    aria-disabled={!activeDate}
+                    disabled={!activeDate}
+                    onChange={(value) => {
+                        if (!value) return;
+                        dispatch({
+                            type: "dueDate",
+                            payload: new Date(value?.toISOString()),
+                        });
+                    }}
+                />
+                <FormActions
+                    loading={addTodo.isLoading || editTodo.isLoading}
+                    onCancel={close}
+                />
             </form>
         </ModalContainer>
     );
