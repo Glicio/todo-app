@@ -8,8 +8,15 @@
     --primary-color: #000;
     --secondary-color: #502FAC;
     --tertiary-color: #4a5568;
+    --gray-300: rgb(209,213,219);
+    --red-400: rgb(248 113 113);
+    --yellow-400: rgb(250 204 21);
+    --green-400: rgb(74 222 128);
+    --disabled-color: rgb(209,213,219);
 }
-
+.form-item{
+    @apply flex flex-col;
+}
 .primary-text-input{
     @apply border rounded-md bg-white text-black p-2;
 }
@@ -21,10 +28,10 @@
 }
 
 .primary-button{
-    @apply bg-[var(--secondary-color)] px-4 py-2 rounded-md text-white w-[8rem];
+    @apply bg-[var(--secondary-color)] px-4 py-2 rounded-md text-white max-w-[8rem] h-10 flex justify-center items-center;
 }
 .secondary-button{
-    @apply px-4 py-2 border border-white rounded-md text-white w-[8rem];
+    @apply px-4 py-2 border border-[var(--tertiary-color)] rounded-md text-white max-w-[8rem] h-10 flex justify-center items-center;
 }
 
 .thin-scroll::-webkit-scrollbar {
@@ -37,4 +44,97 @@
 .thin-scroll::-webkit-scrollbar-thumb {
     background: var(--secondary-color);
 }
+
+.no-scroll::-webkit-scrollbar {
+    width: 2px;
+    height: 2px;
+}
+.no-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+.no-scroll::-webkit-scrollbar-thumb {
+    background: transparent;
+}
+
+.cool-text{
+    color: transparent;
+    background-image: linear-gradient(to right, var(--secondary-color), var(--tertiary-color));
+    background-clip: text;
+    background-size: 1000px 100%;
+    background-repeat: repeat-x;
+    animation: bgGradient 5s linear infinite;
+}
+
+@keyframes bgGradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+/* animations */
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+}
+@keyframes open {
+    0% {
+        max-height: 0;
+    }
+    100% {
+        max-height: 100vh;
+    }
+}
+@keyframes close {
+    0% {
+        max-height: 100vh;
+    }
+    100% {
+        max-height: 0;
+    }
+}
+.fadeIn {
+    animation-name: fadeIn;
+    animation-duration: 0.1s;
+    animation-fill-mode: forwards;
+}
+.fadeOut {
+    animation-name: fadeOut;
+    animation-duration: 0.1s;
+    animation-fill-mode: forwards;
+}
+.open {
+    animation-name: open;
+    animation-duration: .3s;
+    animation-fill-mode: forwards;
+    transition: max-height .3s ease-in-out;
+    overflow: hidden;
+}
+.close {
+    animation-name: close;
+    animation-duration: .3s;
+    animation-fill-mode: forwards;
+    transition: max-height .3s ease-in-out;
+    overflow: hidden;
+}
+
+
 

@@ -17,4 +17,6 @@ export interface TodoResponse {
     done: string;
     dueDate: string;
     updatedAt: string;
+    doneAt: string;
+    doneById: string;
 }

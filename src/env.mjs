@@ -8,8 +8,6 @@ const server = z.object({
     //DATABASE
     // PRISMA
     DATABASE_URL: z.string().url(),
-    // PLANETSCALE
-
     NODE_ENV: z.enum(["development", "test", "production"]),
     NEXTAUTH_SECRET:
         process.env.NODE_ENV === "production"
@@ -28,9 +26,16 @@ const server = z.object({
     //GOOGLE
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
+    // PLANETSCALE
     DATABASE_HOST: z.string(),
     DATABASE_USERNAME: z.string(),
     DATABASE_PASSWORD: z.string(),
+    //General
+    BASE_URL: z.string(),
+    //SendGrid
+    SENDGRID_API_KEY: z.string(),
+    INVITATION_TEMPLATE_ID: z.string(),
+    LOGIN_TEMPLATE_ID: z.string(),
 });
 
 /**
@@ -62,6 +67,12 @@ const processEnv = {
     DATABASE_HOST: process.env.DATABASE_HOST,
     DATABASE_USERNAME: process.env.DATABASE_USERNAME,
     DATABASE_PASSWORD: process.env.DATABASE_PASSWORD,
+    //General
+    BASE_URL: process.env.BASE_URL,
+    //SendGrid
+    SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
+    INVITATION_TEMPLATE_ID: process.env.INVITATION_TEMPLATE_ID,
+    LOGIN_TEMPLATE_ID: process.env.LOGIN_TEMPLATE_ID,
 };
 
 // Don't touch the part below
