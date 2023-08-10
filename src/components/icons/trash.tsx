@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function Trash({size}: { size: string }) {
+export default function Trash({size}: { size?: string }) {
     return (
         <svg
             xmlns="http://www.w3.org/2000/svg"
