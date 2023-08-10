@@ -5,17 +5,16 @@ import ModalContainer from "../containers/modal_container";
 import { userContext } from "~/contexts/UserProvider";
 import { notifications } from "@mantine/notifications";
 import ErrorIcon from "../icons/erro_icon";
-import TextInput from "../input/text_input";
 import FormItem from "../input/form_item";
 import FormActions from "../input/form_actions";
 import type SimpleTodo from "~/utils/simple_todo";
 import { TodoContext } from "~/contexts/TodoContext";
 import type SimpleUser from "~/utils/simple_user";
-import DefaultMultiSelect from "../input/default_multi_select";
 import AddIcon from "../icons/add";
 import Trash from "../icons/trash";
-import { Input, Tabs, Textarea } from "@mantine/core";
 import Member from "../content/team_member";
+import { Tabs, MultiSelect, TextInput, Textarea, Input } from "@mantine/core";
+import DefaultMultiSelect from "../input/default_multi_select";
 
 
 interface Step {
@@ -98,22 +97,23 @@ export default function AddTodo({
     close,
     onAdd,
     onEdit,
-    todoToEdit
+    todoToEdit,
 }: {
     opened: boolean;
     close: () => void;
     onAdd?: (todo: SimpleTodo) => void;
     onEdit?: (todo: SimpleTodo) => void;
-    todoToEdit?: SimpleTodo
+    todoToEdit?: SimpleTodo;
 }) {
     const { agent, agentType } = React.useContext(userContext);
-    const { categories } = React.useContext(TodoContext)
-    const [teamMembers, setTeamMembers] = React.useState<SimpleUser[]>([])
+    const { categories } = React.useContext(TodoContext);
+    const [teamMembers, setTeamMembers] = React.useState<SimpleUser[]>([]);
     const [todo, dispatch] = React.useReducer(todoReducer, todoInitialState);
     const [activeDate, setActiveDate] = React.useState(false);
     const [stepForm, dispatchStepForm] = React.useReducer(stepReducer, { title: "", done: false });
     //procedures
-    const getTeamMembers = api.teams.getTeamUsers.useQuery({ teamId: agent?.id as string },
+    const getTeamMembers = api.teams.getTeamUsers.useQuery(
+        { teamId: agent?.id as string },
         {
             enabled: agentType === "team" && agent !== undefined,
         }
@@ -122,6 +122,7 @@ export default function AddTodo({
         dispatch({ type: "reset", payload: "" })
         close()
     }
+
     const addTodo = api.todos.createTodo.useMutation({
         onSuccess: (data) => {
             if (onAdd) {
@@ -145,38 +146,58 @@ export default function AddTodo({
                 onEdit(data);
             }
             handleClose();
+        },
+    });
+
+    const getColors = React.useCallback(() => {
+        if(!todo.categoriesId) return []
+        if(todo.categoriesId.length === 1 && todo.categoriesId) {
+            return categories.find((category) => category.id === (todo.categoriesId as string[])[0])?.color || []
         }
-    })
+        const colors: string[] = []
+        for(const categoryId of todo.categoriesId){
+            const color = categories.find((category) => category.id === categoryId)?.color
+            if(color) colors.push(color)
+        }
+        return colors
+    }, [todo.categoriesId, categories])
 
     //hooks
     React.useEffect(() => {
         if (agentType === "team" && agent !== undefined) {
-            void getTeamMembers.refetch()
+            void getTeamMembers.refetch();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [agentType, agent])
+    }, [agentType, agent]);
 
     React.useEffect(() => {
         if (getTeamMembers.data) {
-            setTeamMembers(getTeamMembers.data)
+            setTeamMembers(getTeamMembers.data);
         }
-    }, [getTeamMembers.data])
+    }, [getTeamMembers.data]);
 
     React.useEffect(() => {
         if (todoToEdit) {
             dispatch({
-                type: 'set', payload: {
+                type: "set",
+                payload: {
                     id: todoToEdit.id,
                     title: todoToEdit.title,
                     description: todoToEdit.description || undefined,
-                    dueDate: todoToEdit.dueDate ? new Date(todoToEdit.dueDate) : undefined,
-                    categoriesId: todoToEdit.categories.length > 0 ? todoToEdit.categories.map(curr => curr.id) : undefined,
-                    assignedTo: todoToEdit.assignedTo?.map(curr => curr.id) || [],
                     steps: todoToEdit.steps || [],
-                }
-            })
+                    dueDate: todoToEdit.dueDate
+                        ? new Date(todoToEdit.dueDate)
+                        : undefined,
+                    categoriesId:
+                        todoToEdit.categories.length > 0
+                            ? todoToEdit.categories.map((curr) => curr.id)
+                            : undefined,
+                    assignedTo:
+                        todoToEdit.assignedTo?.map((curr) => curr.id) || [],
+                },
+            });
         }
-    }, [todoToEdit])
+    }, [todoToEdit]);
 
     const addStep = (step: Step) => {
         if (todo.steps && todo.steps.length >= 50) {
@@ -193,15 +214,16 @@ export default function AddTodo({
     }
     return (
         <ModalContainer opened={opened}
-            color={todo.categoriesId && todo.categoriesId?.length > 0 ?
-                todo.categoriesId.map(curr => categories.find(category => category.id === curr)?.color as string)
-                :
-                ""}
             onClose={() => {
+                dispatch({ type: "reset", payload: "" });
                 handleClose()
-            }} title={todoToEdit ? "Edit To-do" : "Add new to-do"} keepMounted={false}>
+            }} 
+            title={todoToEdit ? "Edit To-do" : "Add new to-do"} 
+            color={getColors()} 
+            keepMounted={false}
+        >
             <form
-                className="w-full flex gap-2 flex-col"
+                className="flex w-full flex-col gap-2"
                 onSubmit={(e) => {
                     e.preventDefault();
                     if (!agent) return;
@@ -216,7 +238,7 @@ export default function AddTodo({
                             dueDate: activeDate ? todo.dueDate || null : null,
                             categoriesIds: todo.categoriesId || null,
                             assignedUsersIds: todo.assignedTo || null,
-                        })
+                        });
                     }
                     addTodo.mutate({
                         agentId: agent.id,
@@ -248,8 +270,8 @@ export default function AddTodo({
                                 label="Title"
                                 value={todo.title}
                                 required
-                                onChange={(value) =>
-                                    dispatch({ type: "title", payload: value })
+                                onChange={(e) =>
+                                    dispatch({ type: "title", payload: e.target.value })
                                 }
                                 placeholder="The title of your todo"
                             />
