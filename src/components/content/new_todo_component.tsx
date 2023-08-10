@@ -9,6 +9,7 @@ import { api } from '~/utils/api'
 import { userContext } from '~/contexts/UserProvider'
 import { notifications } from '@mantine/notifications'
 import Prompt from '../forms/prompt'
+import { Tabs } from '@mantine/core'
 
 
 
@@ -22,6 +23,7 @@ const FullTodo = ({ todo, onDone, onDelete, openEdit }: {
     const { agent, agentType } = React.useContext(userContext)
     const [deletePrompt, { open: openDelete, close: closeDelete }] = useDisclosure()
     //mutations
+
     const doneMutation = api.todos.markAsDone.useMutation({
         onSuccess: () => {
             if (onDone) onDone(todo.id)
@@ -70,7 +72,7 @@ const FullTodo = ({ todo, onDone, onDelete, openEdit }: {
         }
     })
     return (
-        <div className="max-h-[75vh] h-[75vh] overflow-hidden flex flex-col">
+        <div className="h-[75vh] flex flex-col">
             <Prompt title='Delete todo' message='Are you sure you want to delete this todo?'
                 loading={deleteMutation.isLoading}
                 onConfirm={() => {
@@ -84,21 +86,51 @@ const FullTodo = ({ todo, onDone, onDelete, openEdit }: {
                 opened={deletePrompt}
                 onClose={closeDelete}
             />
-            <TimeStamps createdAt={todo.createdAt} updatedAt={todo.updatedAt || undefined} createdByName={todo.createdBy.name || undefined} updatedByName={todo.updatedBy?.name || undefined} />
-            {(todo.description || todo.categories) ? <div className="border-b border-[var(--tertiary-color)] my-1"></div> : null}
-            <div className="py-2 flex flex-col flex-grow max-h-[75vh] my-1 overflow-y-auto ">
-                {todo.categories.length > 0 ? <CategoriesList categories={todo.categories} /> : null}
-                {todo.description ?
-                    <div className="flex-grow thin-scroll overflow-y-auto">
-                        <h2 className="text-lg font-bold">
-                            Description
-                        </h2>
-                        <p className="leading-4 ">
-                            {todo.description}
-                        </p>
+            <Tabs defaultValue={"general"}
+                className="flex-grow flex flex-col overflow-hidden"
+                color="secondary-color.0"
+            >
+                <Tabs.List>
+                    <Tabs.Tab value="general">General</Tabs.Tab>
+                    <Tabs.Tab value="details">Details</Tabs.Tab>
+                </Tabs.List>
+                <Tabs.Panel value="general" className="overflow-hidden h-[65vh] ">
+                    <div className="py-2 flex flex-col h-full">
+                        {todo.categories.length > 0 ? <CategoriesList categories={todo.categories} /> : null}
+
+                        <div className="flex-grow thin-scroll overflow-y-auto ">
+                            {todo.steps && todo.steps.length > 0
+                                ?
+                                <>
+                                    <h2 className="text-lg font-bold">
+                                        Steps
+                                    </h2>
+                                    {todo.steps?.map(curr => {
+                                        return <div key={curr.id} className="flex gap-2">
+                                            <input type="checkbox" readOnly checked={curr.done} />
+                                            <span>
+                                                {curr.title}
+                                            </span>
+                                        </div>
+                                    })}
+                                </>
+                                : null}
+                            {todo.description ?
+                                <>
+                                    <h2 className="text-lg font-bold">
+                                        Description
+                                    </h2>
+                                    <p className="leading-4">
+                                        {todo.description}
+                                    </p>
+                                </>
+                                : null}
+                        </div>
                     </div>
-                    : null}
-            </div>
+                </Tabs.Panel>
+                <Tabs.Panel value="details" className="h-[60vh]">
+                </Tabs.Panel>
+            </Tabs>
             <TodoActions
                 doLoading={doneMutation.isLoading}
                 deleteLoading={deleteMutation.isLoading}

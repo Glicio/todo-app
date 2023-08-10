@@ -43,14 +43,11 @@ export default function Todos({ done }: { done: boolean }) {
     React.useEffect(() => {
         const activeCategories = new Set<string>()
         for (const todo of todosList) {
-            console.log(todo)
             if (todo.categories.length === 0) continue
             for (const category of todo.categories) {
-                console.log(category)
                 activeCategories.add(category.id)
             }
         }
-        console.log(activeCategories)
         setCategoriesList(categories.filter(category => activeCategories.has(category.id)))
     }, [categories, todosList])
 
